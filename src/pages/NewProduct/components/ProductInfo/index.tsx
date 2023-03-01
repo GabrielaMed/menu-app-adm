@@ -6,6 +6,10 @@ import Button from 'react-bootstrap/Button';
 export const ProductInfo = () => {
   const [data, setData] = useState<IProduct>();
 
+  const handleSubmit = () => {
+    console.log(data);
+  };
+
   return (
     <Form>
       <Form.Group className='mb-3'>
@@ -14,7 +18,8 @@ export const ProductInfo = () => {
           type='file'
           placeholder='Insira uma foto'
           accept='image/png, image/jpeg, image/jpg'
-          required
+
+          //required
         />
       </Form.Group>
 
@@ -24,7 +29,7 @@ export const ProductInfo = () => {
           type='text'
           placeholder='Título'
           required
-          value={data?.title}
+          value={!data?.title ? '' : data.title}
           onChange={(e) =>
             setData((state) => ({ ...state, title: e.target.value }))
           }
@@ -39,7 +44,7 @@ export const ProductInfo = () => {
           rows={3}
           placeholder='Descrição'
           required
-          value={data?.description}
+          value={!data?.description ? '' : data.description}
           onChange={(e) =>
             setData((state) => ({ ...state, description: e.target.value }))
           }
@@ -52,14 +57,14 @@ export const ProductInfo = () => {
           type='number'
           placeholder='Valor'
           required
-          value={data?.price}
+          value={!data?.price ? '' : data.price}
           onChange={(e) => {
             setData((state) => ({ ...state, price: +e.target.value }));
           }}
         />
       </Form.Group>
 
-      <Button variant='primary' type='submit'>
+      <Button variant='primary' type='submit' onClick={handleSubmit}>
         Criar
       </Button>
     </Form>
