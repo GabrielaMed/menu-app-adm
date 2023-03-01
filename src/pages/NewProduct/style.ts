@@ -31,5 +31,4 @@ export const Content = styled.div`
   display: flex;
   box-sizing: border-box;
   flex-direction: column;
-  gap: 1rem;
 `;
