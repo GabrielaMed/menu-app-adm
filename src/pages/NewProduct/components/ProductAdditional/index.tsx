@@ -18,13 +18,15 @@ export const ProductAdditional = () => {
     },
   ]);
 
+  console.log(additionals);
+
   const handleSearch = (name: string) => {
     setAdditional((state) => ({
       ...state,
       name,
     }));
 
-    if (additional?.name !== '') {
+    if (additional?.name) {
       const filteredAdditionals = additionals
         .filter((item) => {
           const itemName = item?.name?.toLocaleLowerCase()!;
@@ -39,10 +41,23 @@ export const ProductAdditional = () => {
   };
 
   const handleSubmit = () => {
-    setAdditionals((state) => ({
+    if (!additional?.name || !additional.price) return;
+    if (
+      additionals.find(
+        (item) =>
+          item.name?.toLocaleLowerCase() ===
+          additional?.name?.toLocaleLowerCase()
+      )
+    )
+      return;
+
+    setAdditionals((state) => [
       ...state,
-      additional,
-    }));
+      {
+        name: additional?.name,
+        price: additional?.price,
+      },
+    ]);
   };
 
   return (
@@ -52,22 +67,17 @@ export const ProductAdditional = () => {
           <Form.Label>Adicional:</Form.Label>
           <Form.Control
             type='text'
-            placeholder='Adicional'
+            placeholder='Nome'
             required
-            value={!additional?.name ? '' : additional.name}
+            value={additional?.name}
             onChange={(e) => handleSearch(e.target.value)}
           />
-          <ListGroup>
+          <ListGroup style={{ display: additional?.name ? 'block' : 'none' }}>
             {filteredResults.map((item, idx) => {
               return (
                 <ListGroup.Item
                   key={idx}
-                  onClick={() =>
-                    setAdditional((state) => ({
-                      ...state,
-                      name: item.name,
-                    }))
-                  }
+                  onClick={() => handleSearch(item.name!)}
                 >
                   {item.name}
                 </ListGroup.Item>
@@ -82,20 +92,29 @@ export const ProductAdditional = () => {
             type='number'
             placeholder='Valor'
             required
+            value={additional?.price}
+            step='0.01'
+            min='0.01'
             onChange={(e) => {
               setAdditional((state) => ({ ...state, price: +e.target.value }));
             }}
           />
         </Form.Group>
         <Form.Group className='mb-3'>
-          <Button variant='primary' type='submit' onClick={handleSubmit}>
+          <Button
+            variant='primary'
+            type='submit'
+            onClick={handleSubmit}
+            formAction='#'
+          >
             Adicionar
           </Button>
         </Form.Group>
       </Form>
 
-      <Card>
+      <Card className='text-center'>
         <Card.Body>
+          <Card.Title>Lista de Adicionais</Card.Title>
           <ListGroup variant='flush'>
             {additionals.map((item, idx) => {
               return (
