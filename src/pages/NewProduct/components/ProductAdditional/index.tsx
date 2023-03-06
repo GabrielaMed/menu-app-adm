@@ -1,61 +1,58 @@
 import { Button, Card, Form } from 'react-bootstrap';
-import InputGroup from 'react-bootstrap/InputGroup';
 import ListGroup from 'react-bootstrap/ListGroup';
 import { useState } from 'react';
 import { IAdditional } from '../../../../utils/Interface/Additional';
+import { IProduct } from '../../../../utils/Interface/Product';
 
-export const ProductAdditional = () => {
-  const [additional, setAdditional] = useState<IAdditional>();
+interface Props {
+  productData: IProduct;
+  setProductData: (productData: any) => void;
+}
+
+export const ProductAdditional = ({ productData, setProductData }: Props) => {
+  const [additionalData, setAdditionalData] = useState<IAdditional>();
   const [filteredResults, setFilteredResults] = useState<IAdditional[]>([]);
-  const [additionals, setAdditionals] = useState<IAdditional[]>([
-    {
-      name: 'Pão',
-      price: 2,
-    },
-    {
-      name: 'Bacon',
-      price: 5,
-    },
-  ]);
-
-  console.log(additionals);
 
   const handleSearch = (name: string) => {
-    setAdditional((state) => ({
+    setAdditionalData((state) => ({
       ...state,
       name,
     }));
 
-    if (additional?.name) {
-      const filteredAdditionals = additionals
-        .filter((item) => {
+    if (additionalData?.name) {
+      const filteredAdditionals = productData?.additional
+        ?.filter((item) => {
           const itemName = item?.name?.toLocaleLowerCase()!;
-          const inputName = additional?.name?.toLocaleLowerCase();
+          const inputName = additionalData?.name?.toLocaleLowerCase();
           if (itemName === inputName) return;
           return inputName && itemName.includes(inputName);
         })
         .slice(0, 5);
 
-      setFilteredResults(filteredAdditionals);
+      setFilteredResults(filteredAdditionals!);
     }
   };
 
   const handleSubmit = () => {
-    if (!additional?.name || !additional.price) return;
+    if (!additionalData?.name || !additionalData.price) return;
     if (
-      additionals.find(
+      productData?.additional?.find(
         (item) =>
           item.name?.toLocaleLowerCase() ===
-          additional?.name?.toLocaleLowerCase()
+          additionalData?.name?.toLocaleLowerCase()
       )
     )
       return;
 
-    setAdditionals((state) => [
-      ...state,
+    setProductData((state: any) => [
       {
-        name: additional?.name,
-        price: additional?.price,
+        ...state,
+        additional: [
+          {
+            name: additionalData?.name,
+            price: additionalData?.price,
+          },
+        ],
       },
     ]);
   };
@@ -69,20 +66,26 @@ export const ProductAdditional = () => {
             type='text'
             placeholder='Nome'
             required
-            value={additional?.name}
+            value={additionalData?.name}
             onChange={(e) => handleSearch(e.target.value)}
           />
-          <ListGroup style={{ display: additional?.name ? 'block' : 'none' }}>
-            {filteredResults.map((item, idx) => {
-              return (
-                <ListGroup.Item
-                  key={idx}
-                  onClick={() => handleSearch(item.name!)}
-                >
-                  {item.name}
-                </ListGroup.Item>
-              );
-            })}
+          <ListGroup
+            style={{ display: additionalData?.name ? 'block' : 'none' }}
+          >
+            {filteredResults ? (
+              filteredResults.map((item, idx) => {
+                return (
+                  <ListGroup.Item
+                    key={idx}
+                    onClick={() => handleSearch(item.name!)}
+                  >
+                    {item.name}
+                  </ListGroup.Item>
+                );
+              })
+            ) : (
+              <ListGroup.Item></ListGroup.Item>
+            )}
           </ListGroup>
         </Form.Group>
 
@@ -92,11 +95,14 @@ export const ProductAdditional = () => {
             type='number'
             placeholder='Valor'
             required
-            value={additional?.price}
+            value={additionalData?.price}
             step='0.01'
             min='0.01'
             onChange={(e) => {
-              setAdditional((state) => ({ ...state, price: +e.target.value }));
+              setAdditionalData((state) => ({
+                ...state,
+                price: +e.target.value,
+              }));
             }}
           />
         </Form.Group>
@@ -116,7 +122,7 @@ export const ProductAdditional = () => {
         <Card.Body>
           <Card.Title>Lista de Adicionais</Card.Title>
           <ListGroup variant='flush'>
-            {additionals.map((item, idx) => {
+            {productData?.additional?.map((item, idx) => {
               return (
                 <ListGroup.Item
                   key={idx}

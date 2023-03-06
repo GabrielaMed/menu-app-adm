@@ -2,24 +2,26 @@ import { useState } from 'react';
 import { IProduct } from '../../../../utils/Interface/Product';
 import { Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
-export const ProductInfo = () => {
-  const [data, setData] = useState<IProduct>();
 
+interface Props {
+  productData: IProduct;
+  setProductData: (productData: any) => void;
+}
+
+export const ProductInfo = ({ productData, setProductData }: Props) => {
   const uploadImages = (files: FileList) => {
     let formData = new FormData();
 
     for (let i = 0; i < files.length; i++) {
-      formData.append('file', files[i]);
+      formData.append('file', files[i], files[i].name);
     }
 
-    console.log(formData);
-    const config = {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    };
-  };
+    //formData.forEach((file) => console.log('File: ', file));
 
-  const handleSubmit = () => {
-    console.log(data);
+    setProductData((state: any) => ({
+      ...state,
+      image: [formData.getAll('file')],
+    }));
   };
 
   return (
@@ -42,9 +44,12 @@ export const ProductInfo = () => {
           type='text'
           placeholder='Título'
           required
-          value={data?.title}
+          value={productData?.title}
           onChange={(e) =>
-            setData((state) => ({ ...state, title: e.target.value }))
+            setProductData((state: any) => ({
+              ...state,
+              title: e.target.value,
+            }))
           }
         />
       </Form.Group>
@@ -57,9 +62,12 @@ export const ProductInfo = () => {
           rows={3}
           placeholder='Descrição'
           required
-          value={data?.description}
+          value={productData?.description}
           onChange={(e) =>
-            setData((state) => ({ ...state, description: e.target.value }))
+            setProductData((state: any) => ({
+              ...state,
+              description: e.target.value,
+            }))
           }
         />
       </Form.Group>
@@ -72,14 +80,17 @@ export const ProductInfo = () => {
           step='0.01'
           min='0.01'
           required
-          value={data?.price}
+          value={productData?.price}
           onChange={(e) => {
-            setData((state) => ({ ...state, price: +e.target.value }));
+            setProductData((state: any) => ({
+              ...state,
+              price: +e.target.value,
+            }));
           }}
         />
       </Form.Group>
 
-      <Button variant='primary' type='submit' onClick={handleSubmit}>
+      <Button variant='primary' type='submit'>
         Criar
       </Button>
     </Form>
