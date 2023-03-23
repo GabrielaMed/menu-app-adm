@@ -1,8 +1,30 @@
 import { Button, Card, Form } from 'react-bootstrap';
 import ListGroup from 'react-bootstrap/ListGroup';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { IAdditional } from '../../../../utils/Interface/Additional';
 import { IProduct } from '../../../../utils/Interface/Product';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const additionalFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(3, { message: 'Nome do adicional deve ter pelo menos 3 caracteres.' })
+    .max(100, { message: 'Nome do produto deve ter no máximo 100 caracteres.' })
+    .transform((name) => name.toLowerCase()),
+  price: z
+    .string()
+    .nonempty({ message: 'Valor não pode ser nulo.' })
+    .regex(/^\d+(\.\d{1,2})?$/, {
+      message:
+        'Valor deve ser um número finito e positivo, com no máximo duas casas decimais.',
+    })
+    .max(10, { message: 'Valor deve conter no máximo 10 números.' }),
+});
+
+type AdditionalFormSchema = z.infer<typeof additionalFormSchema>;
 
 interface Props {
   productData: IProduct;
@@ -11,7 +33,15 @@ interface Props {
 
 export const ProductAdditional = ({ productData, setProductData }: Props) => {
   const [additionalData, setAdditionalData] = useState<IAdditional>();
+  const [additionalsList, setAdditionalsList] = useState<IAdditional[]>([]);
   const [filteredResults, setFilteredResults] = useState<IAdditional[]>([]);
+  const {
+    register,
+    formState: { errors, isSubmitting },
+    handleSubmit,
+  } = useForm<AdditionalFormSchema>({
+    resolver: zodResolver(additionalFormSchema),
+  });
 
   const handleSearch = (name: string) => {
     setAdditionalData((state) => ({
@@ -33,33 +63,29 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
     }
   };
 
-  const handleSubmit = () => {
-    if (!additionalData?.name || !additionalData.price) return;
+  const handleRegister = (data: AdditionalFormSchema) => {
     if (
-      productData?.additional?.find(
+      additionalsList?.find(
         (item) =>
-          item.name?.toLocaleLowerCase() ===
-          additionalData?.name?.toLocaleLowerCase()
+          item.name?.toLocaleLowerCase() === data?.name?.toLocaleLowerCase()
       )
     )
       return;
 
-    setProductData((state: any) => [
-      {
-        ...state,
-        additional: [
-          {
-            name: additionalData?.name,
-            price: additionalData?.price,
-          },
-        ],
-      },
-    ]);
+    additionalsList.push({
+      name: data?.name,
+      price: data?.price,
+    });
+
+    setProductData((state: any) => ({
+      ...state,
+      additional: additionalsList,
+    }));
   };
 
   return (
     <>
-      <Form>
+      <Form onSubmit={handleSubmit(handleRegister)}>
         <Form.Group className='mb-3'>
           <Form.Label>Adicional:</Form.Label>
           <Form.Control
@@ -67,11 +93,14 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
             placeholder='Nome'
             required
             value={additionalData?.name}
-            onChange={(e) => handleSearch(e.target.value)}
+            {...register('name')}
           />
-          <ListGroup
-            style={{ display: additionalData?.name ? 'block' : 'none' }}
-          >
+          {errors.name && (
+            <label style={{ color: 'red', marginTop: '0.5rem' }}>
+              {errors.name.message}
+            </label>
+          )}
+          <ListGroup style={{ display: filteredResults ? 'block' : 'none' }}>
             {filteredResults ? (
               filteredResults.map((item, idx) => {
                 return (
@@ -95,24 +124,19 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
             type='number'
             placeholder='Valor'
             required
-            value={additionalData?.price}
             step='0.01'
             min='0.01'
-            onChange={(e) => {
-              setAdditionalData((state) => ({
-                ...state,
-                price: +e.target.value,
-              }));
-            }}
+            value={additionalData?.price}
+            {...register('price')}
           />
+          {errors.price && (
+            <label style={{ color: 'red', marginTop: '0.5rem' }}>
+              {errors.price.message}
+            </label>
+          )}
         </Form.Group>
         <Form.Group className='mb-3'>
-          <Button
-            variant='primary'
-            type='submit'
-            onClick={handleSubmit}
-            formAction='#'
-          >
+          <Button variant='primary' type='submit' disabled={isSubmitting}>
             Adicionar
           </Button>
         </Form.Group>
