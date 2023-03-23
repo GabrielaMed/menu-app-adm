@@ -1,7 +1,37 @@
-import { useState } from 'react';
 import { IProduct } from '../../../../utils/Interface/Product';
 import { Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const productFormSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(3, { message: 'Nome do produto deve ter pelo menos 3 caracteres.' })
+    .max(100, { message: 'Nome do produto deve ter no máximo 100 caracteres.' })
+    .transform((name) => name.toLowerCase()),
+  description: z
+    .string()
+    .trim()
+    .min(3, {
+      message: 'Descrição do produto deve ter pelo menos 3 caracteres.',
+    })
+    .max(500, {
+      message: 'Descrição do produto deve ter no máximo 500 caracteres.',
+    })
+    .transform((description) => description.toLowerCase()),
+  price: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/, {
+      message:
+        'Valor deve ser um número finito e positivo, com no máximo duas casas decimais.',
+    })
+    .max(10, { message: 'Valor deve conter no máximo 10 números.' }),
+});
+
+type ProductFormSchema = z.infer<typeof productFormSchema>;
 
 interface Props {
   productData: IProduct;
@@ -9,6 +39,14 @@ interface Props {
 }
 
 export const ProductInfo = ({ productData, setProductData }: Props) => {
+  const {
+    register,
+    formState: { errors, isSubmitting },
+    handleSubmit,
+  } = useForm<ProductFormSchema>({
+    resolver: zodResolver(productFormSchema),
+  });
+
   const uploadImages = (files: FileList) => {
     let formData = new FormData();
 
@@ -20,18 +58,27 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
 
     setProductData((state: any) => ({
       ...state,
-      image: [formData.getAll('file')],
+      image: formData.getAll('file'),
     }));
   };
 
+  async function handleRegister(data: ProductFormSchema) {
+    setProductData((state: any) => ({
+      ...state,
+      title: data.title,
+      description: data.description,
+      price: data.price,
+    }));
+  }
+
   return (
-    <Form>
+    <Form onSubmit={handleSubmit(handleRegister)}>
       <Form.Group className='mb-3'>
         <Form.Label>Foto:</Form.Label>
         <Form.Control
           type='file'
           placeholder='Insira uma foto'
-          accept='image/png, image/jpeg, image/jpg'
+          accept='image/png, image/jpeg, image/pjpeg'
           multiple
           onChange={(e) => uploadImages((e.target as HTMLInputElement).files!)}
           required
@@ -45,13 +92,13 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
           placeholder='Título'
           required
           value={productData?.title}
-          onChange={(e) =>
-            setProductData((state: any) => ({
-              ...state,
-              title: e.target.value,
-            }))
-          }
+          {...register('title')}
         />
+        {errors.title && (
+          <label style={{ color: 'red', marginTop: '0.5rem' }}>
+            {errors.title.message}
+          </label>
+        )}
       </Form.Group>
 
       <Form.Group className='mb-3'>
@@ -63,13 +110,13 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
           placeholder='Descrição'
           required
           value={productData?.description}
-          onChange={(e) =>
-            setProductData((state: any) => ({
-              ...state,
-              description: e.target.value,
-            }))
-          }
+          {...register('description')}
         />
+        {errors.description && (
+          <label style={{ color: 'red', marginTop: '0.5rem' }}>
+            {errors.description.message}
+          </label>
+        )}
       </Form.Group>
 
       <Form.Group className='mb-3'>
@@ -78,19 +125,19 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
           type='number'
           placeholder='Valor'
           step='0.01'
-          min='0.01'
+          min='0'
           required
           value={productData?.price}
-          onChange={(e) => {
-            setProductData((state: any) => ({
-              ...state,
-              price: +e.target.value,
-            }));
-          }}
+          {...register('price')}
         />
+        {errors.price && (
+          <label style={{ color: 'red', marginTop: '0.5rem' }}>
+            {errors.price.message}
+          </label>
+        )}
       </Form.Group>
 
-      <Button variant='primary' type='submit'>
+      <Button variant='primary' type='submit' disabled={isSubmitting}>
         Criar
       </Button>
     </Form>
