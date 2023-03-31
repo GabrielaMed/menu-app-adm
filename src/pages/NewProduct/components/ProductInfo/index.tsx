@@ -1,37 +1,9 @@
+import { useForm } from 'react-hook-form';
 import { IProduct } from '../../../../utils/Interface/Product';
 import { Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-
-const productFormSchema = z.object({
-  title: z
-    .string()
-    .trim()
-    .min(3, { message: 'Nome do produto deve ter pelo menos 3 caracteres.' })
-    .max(100, { message: 'Nome do produto deve ter no máximo 100 caracteres.' })
-    .transform((name) => name.toLowerCase()),
-  description: z
-    .string()
-    .trim()
-    .min(3, {
-      message: 'Descrição do produto deve ter pelo menos 3 caracteres.',
-    })
-    .max(500, {
-      message: 'Descrição do produto deve ter no máximo 500 caracteres.',
-    })
-    .transform((description) => description.toLowerCase()),
-  price: z
-    .string()
-    .regex(/^\d+(\.\d{1,2})?$/, {
-      message:
-        'Valor deve ser um número finito e positivo, com no máximo duas casas decimais.',
-    })
-    .max(10, { message: 'Valor deve conter no máximo 10 números.' }),
-});
-
-type ProductFormSchema = z.infer<typeof productFormSchema>;
+import { productSchema } from '../../../../validation/productValidation';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 interface Props {
   productData: IProduct;
@@ -41,10 +13,11 @@ interface Props {
 export const ProductInfo = ({ productData, setProductData }: Props) => {
   const {
     register,
-    formState: { errors, isSubmitting },
     handleSubmit,
-  } = useForm<ProductFormSchema>({
-    resolver: zodResolver(productFormSchema),
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: yupResolver(productSchema),
   });
 
   const uploadImages = (files: FileList) => {
@@ -62,14 +35,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
     }));
   };
 
-  async function handleRegister(data: ProductFormSchema) {
-    setProductData((state: any) => ({
-      ...state,
-      title: data.title,
-      description: data.description,
-      price: data.price,
-    }));
-  }
+  async function handleRegister(data: any) {}
 
   return (
     <Form onSubmit={handleSubmit(handleRegister)}>
@@ -95,9 +61,9 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
           {...register('title')}
         />
         {errors.title && (
-          <label style={{ color: 'red', marginTop: '0.5rem' }}>
-            {errors.title.message}
-          </label>
+          <span style={{ color: 'red', marginTop: '0.5rem' }}>
+            {errors.title?.message?.toString()}
+          </span>
         )}
       </Form.Group>
 
@@ -113,9 +79,9 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
           {...register('description')}
         />
         {errors.description && (
-          <label style={{ color: 'red', marginTop: '0.5rem' }}>
-            {errors.description.message}
-          </label>
+          <span style={{ color: 'red', marginTop: '0.5rem' }}>
+            {errors?.description?.message?.toString()}
+          </span>
         )}
       </Form.Group>
 
@@ -131,13 +97,24 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
           {...register('price')}
         />
         {errors.price && (
-          <label style={{ color: 'red', marginTop: '0.5rem' }}>
-            {errors.price.message}
-          </label>
+          <span style={{ color: 'red', marginTop: '0.5rem' }}>
+            {errors?.price?.message?.toString()}
+          </span>
         )}
       </Form.Group>
 
-      <Button variant='primary' type='submit' disabled={isSubmitting}>
+      <Button
+        variant='primary'
+        type='submit'
+        onClick={() => {
+          reset((formValues) => ({
+            ...formValues,
+            title: '',
+            description: '',
+            price: 0,
+          }));
+        }}
+      >
         Criar
       </Button>
     </Form>
