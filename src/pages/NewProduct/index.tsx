@@ -10,29 +10,44 @@ export const NewProduct = () => {
   const [chosenTab, setchosenTab] = useState('Products');
   const [productData, setProductData] = useState<IProduct>();
   const { id } = useParams();
+  console.log(id, 'id');
 
   return (
     <Container>
       <Header></Header>
-      <Tab>
-        <ChosenTab onClick={() => setchosenTab('Products')}>Produto</ChosenTab>/
-        <ChosenTab onClick={() => setchosenTab('Additional')}>
-          Adicionais
-        </ChosenTab>
-      </Tab>
+      {id ? (
+        <Tab>
+          <ChosenTab onClick={() => setchosenTab('Products')}>
+            Produto
+          </ChosenTab>
+          /
+          <ChosenTab onClick={() => setchosenTab('Additional')}>
+            Adicionais
+          </ChosenTab>
+        </Tab>
+      ) : (
+        <Tab>
+          <ChosenTab onClick={() => setchosenTab('Products')}>
+            Produto
+          </ChosenTab>
+        </Tab>
+      )}
+
       <Content>
         {id ? (
-          <ProductInfo
-            productData={productData!}
-            setProductData={setProductData}
-          />
-        ) : chosenTab === 'Products' ? (
-          <ProductInfo
-            productData={productData!}
-            setProductData={setProductData}
-          />
+          chosenTab === 'Products' ? (
+            <ProductInfo
+              productData={productData!}
+              setProductData={setProductData}
+            />
+          ) : (
+            <ProductAdditional
+              productData={productData!}
+              setProductData={setProductData}
+            />
+          )
         ) : (
-          <ProductAdditional
+          <ProductInfo
             productData={productData!}
             setProductData={setProductData}
           />

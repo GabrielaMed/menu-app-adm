@@ -4,6 +4,7 @@ import { Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import { productSchema } from '../../../../validation/productValidation';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { api } from '../../../../services/api';
 
 interface Props {
   productData: IProduct;
@@ -14,13 +15,14 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm({
     resolver: yupResolver(productSchema),
   });
 
-  const uploadImages = (files: FileList) => {
+  const uploadImages = (files: any) => {
+    console.log(files, 'files');
     let formData = new FormData();
 
     for (let i = 0; i < files.length; i++) {
@@ -33,9 +35,30 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
       ...state,
       image: formData.getAll('file'),
     }));
+
+    // return formData.getAll('file');
   };
 
-  async function handleRegister(data: any) {}
+  async function handleRegister(data: any) {
+    // console.log(data, 'data');
+    // console.log(productData, 'po');
+
+    const companyId = process.env.REACT_APP_COMPANY_ID;
+    const response = await api.post(`${companyId}/product`, {
+      name: data.name,
+      description: data.description,
+      price: data.price,
+    });
+
+    console.log('res', response);
+
+    reset((formValues) => ({
+      ...formValues,
+      name: '',
+      description: '',
+      price: 0,
+    }));
+  }
 
   return (
     <Form onSubmit={handleSubmit(handleRegister)}>
@@ -44,25 +67,28 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
         <Form.Control
           type='file'
           placeholder='Insira uma foto'
+          // name='image'
           accept='image/png, image/jpeg, image/pjpeg'
           multiple
-          onChange={(e) => uploadImages((e.target as HTMLInputElement).files!)}
+          // onChange={(e) => console.log((e.target as HTMLInputElement).files!)}
           required
+          {...register('image')}
+          onChange={(e) => uploadImages((e.target as HTMLInputElement).files!)}
         />
       </Form.Group>
 
       <Form.Group className='mb-3'>
-        <Form.Label>Título:</Form.Label>
+        <Form.Label>Nome:</Form.Label>
         <Form.Control
           type='text'
-          placeholder='Título'
+          placeholder='Nome do produto'
           required
-          value={productData?.title}
-          {...register('title')}
+          value={productData?.name}
+          {...register('name')}
         />
-        {errors.title && (
+        {errors.name && (
           <span style={{ color: 'red', marginTop: '0.5rem' }}>
-            {errors.title?.message?.toString()}
+            {errors.name?.message?.toString()}
           </span>
         )}
       </Form.Group>
@@ -103,18 +129,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
         )}
       </Form.Group>
 
-      <Button
-        variant='primary'
-        type='submit'
-        onClick={() => {
-          reset((formValues) => ({
-            ...formValues,
-            title: '',
-            description: '',
-            price: 0,
-          }));
-        }}
-      >
+      <Button variant='primary' type='submit' disabled={isSubmitting}>
         Criar
       </Button>
     </Form>

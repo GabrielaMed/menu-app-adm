@@ -1,7 +1,8 @@
 import * as yup from 'yup';
 
 export const productSchema = yup.object().shape({
-  title: yup
+  image: yup.mixed(),
+  name: yup
     .string()
     .trim()
     .required('Obrigatório informar título')

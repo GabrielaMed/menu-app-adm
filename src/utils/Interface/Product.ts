@@ -1,7 +1,7 @@
 import { IAdditional } from './Additional';
 
 export interface IProduct {
-  title?: string;
+  name?: string;
   description?: string;
   price?: number;
   additional?: IAdditional[];
