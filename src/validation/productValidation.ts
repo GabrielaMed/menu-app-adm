@@ -18,7 +18,7 @@ export const productSchema = yup.object().shape({
     .transform((description) => description.toLowerCase()),
   price: yup
     .number()
+    .typeError('Obrigatório informar um valor.')
     .required('Obrigatório informar um valor')
-    .positive('Valor deve ser positivo')
-    .max(10, 'Valor deve conter no máximo 10 números.'),
+    .positive('Valor deve ser positivo'),
 });

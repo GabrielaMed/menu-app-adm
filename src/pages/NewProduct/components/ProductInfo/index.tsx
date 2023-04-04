@@ -5,6 +5,10 @@ import Button from 'react-bootstrap/Button';
 import { productSchema } from '../../../../validation/productValidation';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { api } from '../../../../services/api';
+import { useState } from 'react';
+import { IToastType } from '../../../../utils/Interface/Toast';
+import { ToastMessage } from '../../../../components/Toast';
+import { AxiosError } from 'axios';
 
 interface Props {
   productData: IProduct;
@@ -20,6 +24,11 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
   } = useForm({
     resolver: yupResolver(productSchema),
   });
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessageType, setToastMessageType] = useState<IToastType>(
+    IToastType.unknow
+  );
+  const [toastMessage, setToastMessage] = useState('');
 
   const uploadImages = (files: any) => {
     console.log(files, 'files');
@@ -44,13 +53,29 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
     // console.log(productData, 'po');
 
     const companyId = process.env.REACT_APP_COMPANY_ID;
-    const response = await api.post(`${companyId}/product`, {
-      name: data.name,
-      description: data.description,
-      price: data.price,
-    });
+    try {
+      const response = await api.post(`${companyId}/product`, {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+      });
 
-    console.log('res', response);
+      if (response?.data?.product) {
+        setShowToast(true);
+        setToastMessageType(IToastType.success);
+        setToastMessage('Produto criado!');
+      }
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        setShowToast(true);
+        setToastMessageType(IToastType.error);
+        if (err?.response?.data === 'Product already exists.') {
+          setToastMessage('Error: Produto já existe!');
+        } else {
+          setToastMessage(`Error: ${err?.response?.data}`);
+        }
+      }
+    }
 
     reset((formValues) => ({
       ...formValues,
@@ -61,77 +86,87 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
   }
 
   return (
-    <Form onSubmit={handleSubmit(handleRegister)}>
-      <Form.Group className='mb-3'>
-        <Form.Label>Foto:</Form.Label>
-        <Form.Control
-          type='file'
-          placeholder='Insira uma foto'
-          // name='image'
-          accept='image/png, image/jpeg, image/pjpeg'
-          multiple
-          // onChange={(e) => console.log((e.target as HTMLInputElement).files!)}
-          required
-          {...register('image')}
-          onChange={(e) => uploadImages((e.target as HTMLInputElement).files!)}
-        />
-      </Form.Group>
+    <>
+      <ToastMessage
+        setShowToast={setShowToast}
+        showToast={showToast}
+        toastMessage={toastMessage}
+        toastMessageType={toastMessageType}
+      />
+      <Form onSubmit={handleSubmit(handleRegister)}>
+        <Form.Group className='mb-3'>
+          <Form.Label>Foto:</Form.Label>
+          <Form.Control
+            type='file'
+            placeholder='Insira uma foto'
+            // name='image'
+            accept='image/png, image/jpeg, image/pjpeg'
+            multiple
+            // onChange={(e) => console.log((e.target as HTMLInputElement).files!)}
+            required
+            {...register('image')}
+            onChange={(e) =>
+              uploadImages((e.target as HTMLInputElement).files!)
+            }
+          />
+        </Form.Group>
 
-      <Form.Group className='mb-3'>
-        <Form.Label>Nome:</Form.Label>
-        <Form.Control
-          type='text'
-          placeholder='Nome do produto'
-          required
-          value={productData?.name}
-          {...register('name')}
-        />
-        {errors.name && (
-          <span style={{ color: 'red', marginTop: '0.5rem' }}>
-            {errors.name?.message?.toString()}
-          </span>
-        )}
-      </Form.Group>
+        <Form.Group className='mb-3'>
+          <Form.Label>Nome:</Form.Label>
+          <Form.Control
+            type='text'
+            placeholder='Nome do produto'
+            required
+            value={productData?.name}
+            {...register('name')}
+          />
+          {errors.name && (
+            <span style={{ color: 'red', marginTop: '0.5rem' }}>
+              {errors.name?.message?.toString()}
+            </span>
+          )}
+        </Form.Group>
 
-      <Form.Group className='mb-3'>
-        <Form.Label>Descrição:</Form.Label>
-        <Form.Control
-          as='textarea'
-          style={{ resize: 'none' }}
-          rows={3}
-          placeholder='Descrição'
-          required
-          value={productData?.description}
-          {...register('description')}
-        />
-        {errors.description && (
-          <span style={{ color: 'red', marginTop: '0.5rem' }}>
-            {errors?.description?.message?.toString()}
-          </span>
-        )}
-      </Form.Group>
+        <Form.Group className='mb-3'>
+          <Form.Label>Descrição:</Form.Label>
+          <Form.Control
+            as='textarea'
+            style={{ resize: 'none' }}
+            rows={3}
+            placeholder='Descrição'
+            required
+            value={productData?.description}
+            {...register('description')}
+          />
+          {errors.description && (
+            <span style={{ color: 'red', marginTop: '0.5rem' }}>
+              {errors?.description?.message?.toString()}
+            </span>
+          )}
+        </Form.Group>
 
-      <Form.Group className='mb-3'>
-        <Form.Label>Valor:</Form.Label>
-        <Form.Control
-          type='number'
-          placeholder='Valor'
-          step='0.01'
-          min='0'
-          required
-          value={productData?.price}
-          {...register('price')}
-        />
-        {errors.price && (
-          <span style={{ color: 'red', marginTop: '0.5rem' }}>
-            {errors?.price?.message?.toString()}
-          </span>
-        )}
-      </Form.Group>
+        <Form.Group className='mb-3'>
+          <Form.Label>Valor:</Form.Label>
+          <Form.Control
+            type='number'
+            placeholder='Valor'
+            step='0.01'
+            min='0'
+            required
+            value={productData?.price}
+            {...register('price')}
+          />
+          {errors.price && (
+            <span style={{ color: 'red', marginTop: '0.5rem' }}>
+              {errors?.price?.message?.toString()}
+            </span>
+          )}
+        </Form.Group>
 
-      <Button variant='primary' type='submit' disabled={isSubmitting}>
-        Criar
-      </Button>
-    </Form>
+        <Button variant='primary' type='submit' disabled={isSubmitting}>
+          Criar
+        </Button>
+      </Form>
+    </>
   );
 };
