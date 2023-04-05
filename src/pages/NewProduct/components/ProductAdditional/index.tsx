@@ -9,6 +9,11 @@ import {
   additionalSchema,
 } from '../../../../validation/additionalValidation';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { ToastMessage } from '../../../../components/Toast';
+import { IToastType } from '../../../../utils/Interface/Toast';
+import { api } from '../../../../services/api';
+import { AxiosError } from 'axios';
+import { useParams } from 'react-router-dom';
 
 interface Props {
   productData: IProduct;
@@ -19,6 +24,12 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
   const [additionalData, setAdditionalData] = useState<IAdditional>();
   const [additionalsList, setAdditionalsList] = useState<IAdditional[]>([]);
   const [filteredResults, setFilteredResults] = useState<IAdditional[]>([]);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessageType, setToastMessageType] = useState<IToastType>(
+    IToastType.unknow
+  );
+  const [toastMessage, setToastMessage] = useState('');
+  const { productId } = useParams();
   const {
     register,
     handleSubmit,
@@ -29,6 +40,29 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
     resolver: yupResolver(additionalSchema),
     mode: 'onTouched',
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await api.get(`product/${productId}/additionals`);
+
+        if (response.data) {
+          setProductData(response.data);
+        }
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setShowToast(true);
+          setToastMessageType(IToastType.error);
+          setToastMessage(`Error: ${err?.response?.data}`);
+        }
+      }
+    };
+
+    if (productId) {
+      fetchData();
+    }
+  }, [productId]);
+  console.log(productData, 'productttt');
 
   const handleSearch = (name: string) => {
     setAdditionalData((state) => ({
@@ -80,6 +114,12 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
 
   return (
     <>
+      <ToastMessage
+        setShowToast={setShowToast}
+        showToast={showToast}
+        toastMessage={toastMessage}
+        toastMessageType={toastMessageType}
+      />
       <Form onSubmit={handleSubmit(handleRegister)}>
         <Form.Group className='mb-3'>
           <Form.Label>Adicional:</Form.Label>

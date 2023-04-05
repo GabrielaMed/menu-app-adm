@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-export const productSchema = yup.object().shape({
+export const ProductSchema = yup.object().shape({
   image: yup.mixed(),
   name: yup
     .string()
@@ -22,3 +22,5 @@ export const productSchema = yup.object().shape({
     .required('Obrigatório informar um valor')
     .positive('Valor deve ser positivo'),
 });
+
+export type ProductData = yup.InferType<typeof ProductSchema>;

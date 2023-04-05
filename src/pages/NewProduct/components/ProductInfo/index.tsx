@@ -2,13 +2,15 @@ import { useForm } from 'react-hook-form';
 import { IProduct } from '../../../../utils/Interface/Product';
 import { Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
-import { productSchema } from '../../../../validation/productValidation';
+import { ProductSchema } from '../../../../validation/productValidation';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { api } from '../../../../services/api';
 import { useState } from 'react';
 import { IToastType } from '../../../../utils/Interface/Toast';
 import { ToastMessage } from '../../../../components/Toast';
 import { AxiosError } from 'axios';
+import { productImageRegistration } from '../../../../utils/productImageRegistration';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   productData: IProduct;
@@ -22,37 +24,33 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
     formState: { errors, isSubmitting },
     reset,
   } = useForm({
-    resolver: yupResolver(productSchema),
+    resolver: yupResolver(ProductSchema),
   });
   const [showToast, setShowToast] = useState(false);
   const [toastMessageType, setToastMessageType] = useState<IToastType>(
     IToastType.unknow
   );
   const [toastMessage, setToastMessage] = useState('');
+  const navigate = useNavigate();
 
   const uploadImages = (files: any) => {
-    console.log(files, 'files');
     let formData = new FormData();
 
     for (let i = 0; i < files.length; i++) {
       formData.append('file', files[i], files[i].name);
     }
 
-    //formData.forEach((file) => console.log('File: ', file));
-
     setProductData((state: any) => ({
       ...state,
       image: formData.getAll('file'),
     }));
-
-    // return formData.getAll('file');
   };
 
   async function handleRegister(data: any) {
     // console.log(data, 'data');
-    // console.log(productData, 'po');
+    // console.log(productData, 'prod');
 
-    const companyId = process.env.REACT_APP_COMPANY_ID;
+    const companyId = `${process.env.REACT_APP_COMPANY_ID}`;
     try {
       const response = await api.post(`${companyId}/product`, {
         name: data.name,
@@ -61,9 +59,18 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
       });
 
       if (response?.data?.product) {
+        await productImageRegistration.handle(
+          response?.data?.product?.id,
+          productData.image
+        );
+
         setShowToast(true);
         setToastMessageType(IToastType.success);
         setToastMessage('Produto criado!');
+
+        setTimeout(() => {
+          navigate(`/product/${response?.data?.product?.id}`);
+        }, 5000);
       }
     } catch (err) {
       if (err instanceof AxiosError) {
