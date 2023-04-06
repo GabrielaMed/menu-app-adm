@@ -29,7 +29,9 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
     IToastType.unknow
   );
   const [toastMessage, setToastMessage] = useState('');
-  const { productId } = useParams();
+  const { id } = useParams();
+  const companyId = `${process.env.REACT_APP_COMPANY_ID}`;
+
   const {
     register,
     handleSubmit,
@@ -44,10 +46,15 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get(`product/${productId}/additionals`);
+        const response = await api.get(`${companyId}/additionals`);
 
         if (response.data) {
-          setProductData(response.data);
+          const responseFiltered = response.data.map((item: any) => ({
+            name: item.name,
+            price: item.price,
+          }));
+
+          setAdditionalsList(responseFiltered);
         }
       } catch (err) {
         if (err instanceof AxiosError) {
@@ -58,11 +65,10 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
       }
     };
 
-    if (productId) {
+    if (id) {
       fetchData();
     }
-  }, [productId]);
-  console.log(productData, 'productttt');
+  }, [id]);
 
   const handleSearch = (name: string) => {
     setAdditionalData((state) => ({
@@ -71,8 +77,8 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
     }));
 
     if (additionalData?.name) {
-      const filteredAdditionals = productData?.additional
-        ?.filter((item) => {
+      const filteredAdditionals = additionalsList
+        .filter((item) => {
           const itemName = item?.name?.toLocaleLowerCase()!;
           const inputName = additionalData?.name?.toLocaleLowerCase();
           if (itemName === inputName) return;
@@ -80,28 +86,53 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
         })
         .slice(0, 5);
 
-      setFilteredResults(filteredAdditionals!);
+      setFilteredResults(filteredAdditionals);
     }
   };
 
-  const handleRegister = (data: any) => {
+  const handleRegister = async (data: any) => {
     if (
-      additionalsList?.find(
+      productData?.additional?.find(
         (item) =>
           item.name?.toLocaleLowerCase() === data?.name?.toLocaleLowerCase()
       )
-    )
+    ) {
+      reset((formValues) => ({
+        ...formValues,
+        name: ' ',
+        price: 0,
+      }));
+      setFocus('name');
       return;
+    }
 
-    additionalsList.push({
-      name: data?.name,
-      price: data?.price,
-    });
+    // setProductData((state: any) => ({
+    //   ...state,
+    //   additional: [{ name: data?.name, price: data?.price }],
+    // }));
 
-    setProductData((state: any) => ({
-      ...state,
-      additional: additionalsList,
-    }));
+    try {
+      const response = await api.post(`${companyId}/additionals`, {
+        name: data.name,
+        price: data.price,
+      });
+
+      if (response?.data?.product) {
+        setShowToast(true);
+        setToastMessageType(IToastType.success);
+        setToastMessage('Produto criado!');
+      }
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        setShowToast(true);
+        setToastMessageType(IToastType.error);
+        if (err?.response?.data === 'Product already exists.') {
+          setToastMessage('Error: Produto já existe!');
+        } else {
+          setToastMessage(`Error: ${err?.response?.data}`);
+        }
+      }
+    }
 
     setFocus('name');
 
@@ -129,12 +160,8 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
             required
             value={additionalData?.name}
             {...register('name')}
+            onChange={(e) => handleSearch(e.target.value)}
           />
-          {errors.name && (
-            <span style={{ color: 'red', marginTop: '0.5rem' }}>
-              {errors.name?.message?.toString()}
-            </span>
-          )}
           <ListGroup style={{ display: filteredResults ? 'block' : 'none' }}>
             {filteredResults ? (
               filteredResults.map((item, idx) => {
@@ -151,6 +178,11 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
               <ListGroup.Item></ListGroup.Item>
             )}
           </ListGroup>
+          {errors.name && (
+            <span style={{ color: 'red', marginTop: '0.5rem' }}>
+              {errors.name?.message?.toString()}
+            </span>
+          )}
         </Form.Group>
 
         <Form.Group className='mb-3'>

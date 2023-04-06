@@ -23,11 +23,20 @@ export const NewProduct = () => {
     const fetchData = async () => {
       try {
         const response = await api.get(`product/${id}`);
-        const responseImages = await api.get(`product/${id}/image`);
 
         if (response.data) {
-          setProductData(response.data);
+          const { name, description, price } = response.data[0];
+
+          setProductData({ name, description, price });
         }
+
+        const responseAdditional = await api.get(`product/${id}/additionals`);
+
+        if (responseAdditional.data.additionals) {
+          setProductData({ additional: responseAdditional.data.additionals });
+        }
+
+        const responseImages = await api.get(`product/${id}/image`);
         if (responseImages.data.lenght > 0) {
           setProductData((state: any) => ({
             ...state,
@@ -47,7 +56,6 @@ export const NewProduct = () => {
       fetchData();
     }
   }, [id]);
-  console.log('prod', productData);
 
   return (
     <Container>

@@ -10,7 +10,7 @@ import { IToastType } from '../../../../utils/Interface/Toast';
 import { ToastMessage } from '../../../../components/Toast';
 import { AxiosError } from 'axios';
 import { productImageRegistration } from '../../../../utils/productImageRegistration';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface Props {
   productData: IProduct;
@@ -32,6 +32,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
   );
   const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const uploadImages = (files: any) => {
     let formData = new FormData();
@@ -47,9 +48,6 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
   };
 
   async function handleRegister(data: any) {
-    // console.log(data, 'data');
-    // console.log(productData, 'prod');
-
     const companyId = `${process.env.REACT_APP_COMPANY_ID}`;
     try {
       const response = await api.post(`${companyId}/product`, {
@@ -171,7 +169,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
         </Form.Group>
 
         <Button variant='primary' type='submit' disabled={isSubmitting}>
-          Criar
+          {id ? 'Salvar' : 'Criar'}
         </Button>
       </Form>
     </>
