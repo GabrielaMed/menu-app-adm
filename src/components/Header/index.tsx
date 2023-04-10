@@ -1,5 +1,13 @@
-import { Container } from './style';
+import { ICompany } from '../../utils/Interface/Company';
+import { Container, Title } from './style';
 
-export const Header = () => {
-  return <Container></Container>;
+interface Props {
+  pageName: string;
+}
+export const Header = ({ pageName }: Props) => {
+  return (
+    <Container>
+      <Title>{pageName}</Title>
+    </Container>
+  );
 };
