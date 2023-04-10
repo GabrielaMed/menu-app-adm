@@ -59,7 +59,7 @@ export const NewProduct = () => {
 
   return (
     <Container>
-      <Header></Header>
+      <Header pageName='Create Product' />
       {id ? (
         <Tab>
           <ChosenTab onClick={() => setchosenTab('Products')}>
