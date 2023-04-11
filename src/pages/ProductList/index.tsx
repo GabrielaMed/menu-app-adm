@@ -1,12 +1,20 @@
 import { AxiosError } from 'axios';
 import { Header } from '../../components/Header';
-import { Card, Container, Content } from './style';
+import {
+  Card,
+  Container,
+  Content,
+  FooterBox,
+  ImageBox,
+  TextBox,
+} from './style';
 import { IToastType } from '../../utils/Interface/Toast';
 import { api } from '../../services/api';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReactLoading from 'react-loading';
 import { IProduct } from '../../utils/Interface/Product';
+import { MdModeEdit } from 'react-icons/md';
 
 export const ProductList = () => {
   const { companyId } = useParams();
@@ -59,7 +67,21 @@ export const ProductList = () => {
           {productsData?.map((product, idx) => {
             return (
               <Card key={idx}>
-                <span>{product.name}</span>
+                <ImageBox>
+                  <img src='../../utils/Image.png' alt='' />
+                </ImageBox>
+                <TextBox>
+                  <span>
+                    <strong>{product.name}</strong>
+                  </span>
+                  <span>{product.description}</span>
+                </TextBox>
+                <FooterBox>
+                  <span>
+                    R$ <strong>{product.price}</strong>
+                  </span>
+                  <MdModeEdit size={24} />
+                </FooterBox>
               </Card>
             );
           })}
