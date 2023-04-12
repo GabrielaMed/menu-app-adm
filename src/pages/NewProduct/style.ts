@@ -8,7 +8,7 @@ export const Container = styled.div`
 
 export const Tab = styled.div`
   width: 100%;
-  border: 1px solid red;
+  background-color: #335646;
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -19,9 +19,14 @@ export const Tab = styled.div`
 export const ChosenTab = styled.button`
   all: unset;
   width: 100%;
+  color: white;
   display: flex;
   justify-content: center;
   cursor: pointer;
+
+  &:first-child {
+    border-right: 1px solid white;
+  }
 `;
 
 export const Content = styled.div`
