@@ -32,7 +32,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
   );
   const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { companyId, productId } = useParams();
 
   const uploadImages = (files: any) => {
     let formData = new FormData();
@@ -48,36 +48,66 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
   };
 
   async function handleRegister(data: any) {
-    const companyId = `${process.env.REACT_APP_COMPANY_ID}`;
-    try {
-      const response = await api.post(`${companyId}/product`, {
-        name: data.name,
-        description: data.description,
-        price: data.price,
-      });
+    if (!productId) {
+      try {
+        const response = await api.post(`${companyId}/product`, {
+          name: data.name,
+          description: data.description,
+          price: data.price,
+        });
 
-      if (response?.data?.product) {
-        await productImageRegistration.handle(
-          response?.data?.product?.id,
-          productData.image
-        );
+        if (response?.data?.product) {
+          await productImageRegistration.handle(
+            response?.data?.product?.id,
+            productData.image
+          );
 
-        setShowToast(true);
-        setToastMessageType(IToastType.success);
-        setToastMessage('Produto criado!');
+          setShowToast(true);
+          setToastMessageType(IToastType.success);
+          setToastMessage('Produto criado!');
 
-        setTimeout(() => {
-          navigate(`/product/${response?.data?.product?.id}`);
-        }, 5000);
+          setTimeout(() => {
+            navigate(`/${companyId}/product/${response?.data?.product?.id}`);
+          }, 5000);
+        }
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setShowToast(true);
+          setToastMessageType(IToastType.error);
+          if (err?.response?.data === 'Product already exists.') {
+            setToastMessage('Error: Produto já existe!');
+          } else {
+            setToastMessage(`Error: ${err?.response?.data}`);
+          }
+        }
       }
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        setShowToast(true);
-        setToastMessageType(IToastType.error);
-        if (err?.response?.data === 'Product already exists.') {
-          setToastMessage('Error: Produto já existe!');
-        } else {
-          setToastMessage(`Error: ${err?.response?.data}`);
+    } else {
+      try {
+        const response = await api.post(`${companyId}/product/${productId}`, {
+          name: data.name,
+          description: data.description,
+          price: data.price,
+        });
+
+        if (response?.data?.product) {
+          await productImageRegistration.handle(
+            response?.data?.product?.id,
+            productData.image
+          );
+
+          setShowToast(true);
+          setToastMessageType(IToastType.success);
+          setToastMessage('Produto atualizado!');
+        }
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setShowToast(true);
+          setToastMessageType(IToastType.error);
+          if (err?.response?.data === 'Product already exists.') {
+            setToastMessage('Error: Produto já existe!');
+          } else {
+            setToastMessage(`Error: ${err?.response?.data}`);
+          }
         }
       }
     }
@@ -169,7 +199,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
         </Form.Group>
 
         <Button variant='primary' type='submit' disabled={isSubmitting}>
-          {id ? 'Salvar' : 'Criar'}
+          {productId ? 'Salvar' : 'Criar'}
         </Button>
       </Form>
     </>
