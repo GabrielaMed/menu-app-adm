@@ -32,6 +32,7 @@ export const Card = styled.div`
 `;
 
 export const ImageBox = styled.div`
+  background-image: url(../../utils/Image.png);
   background-repeat: no-repeat;
   background-size: cover;
   display: flex;

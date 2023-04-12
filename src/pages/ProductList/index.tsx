@@ -64,12 +64,10 @@ export const ProductList = () => {
       )}
       {!loading && (
         <Content>
-          {productsData?.map((product, idx) => {
+          {productsData?.map((product) => {
             return (
-              <Card key={idx}>
-                <ImageBox>
-                  <img src='../../utils/Image.png' alt='' />
-                </ImageBox>
+              <Card key={product.id}>
+                <ImageBox></ImageBox>
                 <TextBox>
                   <span>
                     <strong>{product.name}</strong>
@@ -80,7 +78,12 @@ export const ProductList = () => {
                   <span>
                     R$ <strong>{product.price}</strong>
                   </span>
-                  <MdModeEdit size={24} />
+                  <MdModeEdit
+                    size={24}
+                    onClick={() =>
+                      navigate(`/${companyId}/product/${product.id}`)
+                    }
+                  />
                 </FooterBox>
               </Card>
             );
