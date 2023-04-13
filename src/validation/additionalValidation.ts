@@ -12,8 +12,7 @@ export const additionalSchema = yup.object().shape({
     .number()
     .typeError('Obrigatório informar um valor.')
     .required('Obrigatório informar um valor.')
-    .positive('Valor deve ser positivo e maior que zero.')
-    .max(10, 'Valor deve conter no máximo 10 números.'),
+    .positive('Valor deve ser positivo e maior que zero.'),
 });
 
 export type AdditionalSchema = yup.InferType<typeof additionalSchema>;
