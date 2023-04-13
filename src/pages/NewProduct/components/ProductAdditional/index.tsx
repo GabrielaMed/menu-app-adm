@@ -29,8 +29,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
     IToastType.unknow
   );
   const [toastMessage, setToastMessage] = useState('');
-  const { id } = useParams();
-  const companyId = `${process.env.REACT_APP_COMPANY_ID}`;
+  const { productId, companyId } = useParams();
 
   const {
     register,
@@ -50,6 +49,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
 
         if (response.data) {
           const responseFiltered = response.data.map((item: any) => ({
+            id: item.id,
             name: item.name,
             price: item.price,
           }));
@@ -65,10 +65,10 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
       }
     };
 
-    if (id) {
+    if (productId) {
       fetchData();
     }
-  }, [id]);
+  }, [productId]);
 
   const handleSearch = (name: string) => {
     setAdditionalData((state) => ({
@@ -91,45 +91,75 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
   };
 
   const handleRegister = async (data: any) => {
+    const companyHasProduct = additionalsList?.find(
+      (item) =>
+        item.name?.toLocaleLowerCase() === data?.name?.toLocaleLowerCase()
+    );
+
     if (
       productData?.additional?.find(
         (item) =>
           item.name?.toLocaleLowerCase() === data?.name?.toLocaleLowerCase()
       )
     ) {
-      reset((formValues) => ({
-        ...formValues,
-        name: ' ',
-        price: 0,
-      }));
-      setFocus('name');
-      return;
-    }
+    } else if (companyHasProduct) {
+      try {
+        const response = await api.post(
+          `/product/${productId}/${companyHasProduct.id}`
+        );
 
-    // setProductData((state: any) => ({
-    //   ...state,
-    //   additional: [{ name: data?.name, price: data?.price }],
-    // }));
+        if (response?.data?.product) {
+          setProductData({
+            ...productData,
+            additional: response.data.product.additional,
+          });
 
-    try {
-      const response = await api.post(`${companyId}/additionals`, {
-        name: data.name,
-        price: data.price,
-      });
-
-      if (response?.data?.product) {
-        setShowToast(true);
-        setToastMessageType(IToastType.success);
-        setToastMessage('Produto criado!');
+          console.log('>>>>>>>>>>>>>>>>>>>>', productData);
+          setShowToast(true);
+          setToastMessageType(IToastType.success);
+          setToastMessage('Produto criado!');
+        }
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setShowToast(true);
+          setToastMessageType(IToastType.error);
+          if (err?.response?.data === 'Product already exists.') {
+            setToastMessage('Error: Produto já existe!');
+          } else {
+            setToastMessage(`Error: ${err?.response?.data}`);
+          }
+        }
       }
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        setShowToast(true);
-        setToastMessageType(IToastType.error);
-        if (err?.response?.data === 'Product already exists.') {
-          setToastMessage('Error: Produto já existe!');
-        } else {
-          setToastMessage(`Error: ${err?.response?.data}`);
+    } else {
+      try {
+        const response = await api.post(`${companyId}/additionals`, {
+          name: data.name,
+          price: data.price,
+        });
+
+        if (response?.data?.product) {
+          const relatesAdditional = await api.post(
+            `/product/${productId}/${response?.data.product.id}`
+          );
+
+          setProductData({
+            ...productData,
+            additional: relatesAdditional.data.product.additional,
+          });
+
+          setShowToast(true);
+          setToastMessageType(IToastType.success);
+          setToastMessage('Produto criado!');
+        }
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setShowToast(true);
+          setToastMessageType(IToastType.error);
+          if (err?.response?.data === 'Product already exists.') {
+            setToastMessage('Error: Produto já existe!');
+          } else {
+            setToastMessage(`Error: ${err?.response?.data}`);
+          }
         }
       }
     }
@@ -158,7 +188,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
             type='text'
             placeholder='Nome'
             required
-            value={additionalData?.name}
+            defaultValue={additionalData?.name}
             {...register('name')}
             onChange={(e) => handleSearch(e.target.value)}
           />
@@ -212,9 +242,9 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
       <Card className='text-center'>
         <Card.Body>
           <Card.Title>Lista de Adicionais</Card.Title>
-          <ListGroup variant='flush'>
-            {productData?.additional?.map((item, idx) => {
-              return (
+          {productData?.additional?.map((item, idx) => {
+            return (
+              <ListGroup variant='flush'>
                 <ListGroup.Item
                   key={idx}
                   style={{ display: 'flex', justifyContent: 'space-between' }}
@@ -222,9 +252,9 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
                   {item.name}
                   <div>R${item.price}</div>
                 </ListGroup.Item>
-              );
-            })}
-          </ListGroup>
+              </ListGroup>
+            );
+          })}
         </Card.Body>
       </Card>
     </>
