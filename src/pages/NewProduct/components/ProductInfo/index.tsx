@@ -81,9 +81,16 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
           }
         }
       }
+
+      reset((formValues) => ({
+        ...formValues,
+        name: '',
+        description: '',
+        price: 0,
+      }));
     } else {
       try {
-        const response = await api.post(`${companyId}/product/${productId}`, {
+        const response = await api.put(`${companyId}/product/${productId}`, {
           name: data.name,
           description: data.description,
           price: data.price,
@@ -111,13 +118,6 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
         }
       }
     }
-
-    reset((formValues) => ({
-      ...formValues,
-      name: '',
-      description: '',
-      price: 0,
-    }));
   }
 
   return (
@@ -152,7 +152,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
             type='text'
             placeholder='Nome do produto'
             required
-            value={productData?.name}
+            defaultValue={productData?.name}
             {...register('name')}
           />
           {errors.name && (
@@ -170,7 +170,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
             rows={3}
             placeholder='Descrição'
             required
-            value={productData?.description}
+            defaultValue={productData?.description}
             {...register('description')}
           />
           {errors.description && (
@@ -179,7 +179,6 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
             </span>
           )}
         </Form.Group>
-
         <Form.Group className='mb-3'>
           <Form.Label>Valor:</Form.Label>
           <Form.Control
@@ -188,7 +187,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
             step='0.01'
             min='0'
             required
-            value={productData?.price}
+            defaultValue={productData?.price}
             {...register('price')}
           />
           {errors.price && (
