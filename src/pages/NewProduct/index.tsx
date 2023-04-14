@@ -11,7 +11,7 @@ import { AxiosError } from 'axios';
 
 export const NewProduct = () => {
   const [chosenTab, setchosenTab] = useState('Products');
-  const [productData, setProductData] = useState<IProduct>();
+  const [productData, setProductData] = useState<IProduct>({});
   const [showToast, setShowToast] = useState(false);
   const [toastMessageType, setToastMessageType] = useState<IToastType>(
     IToastType.unknow
@@ -35,7 +35,10 @@ export const NewProduct = () => {
         );
 
         if (responseAdditional.data.additionals) {
-          setProductData({ additional: responseAdditional.data.additionals });
+          setProductData((prevState: IProduct) => ({
+            ...prevState,
+            additional: responseAdditional.data.additionals,
+          }));
         }
 
         const responseImages = await api.get(`product/${productId}/image`);

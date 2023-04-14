@@ -21,7 +21,9 @@ interface Props {
 }
 
 export const ProductAdditional = ({ productData, setProductData }: Props) => {
-  const [additionalData, setAdditionalData] = useState<IAdditional>();
+  const [additionalData, setAdditionalData] = useState<IAdditional>({
+    name: '',
+  });
   const [additionalsList, setAdditionalsList] = useState<IAdditional[]>([]);
   const [filteredResults, setFilteredResults] = useState<IAdditional[]>([]);
   const [showToast, setShowToast] = useState(false);
@@ -30,6 +32,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
   );
   const [toastMessage, setToastMessage] = useState('');
   const { productId, companyId } = useParams();
+  const [showFilteredResults, setShowFilteredResults] = useState(false);
 
   const {
     register,
@@ -37,6 +40,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
     formState: { errors },
     reset,
     setFocus,
+    trigger,
   } = useForm<AdditionalSchema>({
     resolver: yupResolver(additionalSchema),
     mode: 'onTouched',
@@ -71,10 +75,12 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
   }, [productId]);
 
   const handleSearch = (name: string) => {
-    setAdditionalData((state) => ({
-      ...state,
-      name,
-    }));
+    setShowFilteredResults(false);
+    setAdditionalData({ name });
+
+    setTimeout(() => {
+      trigger('name');
+    }, 500);
 
     if (additionalData?.name) {
       const filteredAdditionals = additionalsList
@@ -82,11 +88,17 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
           const itemName = item?.name?.toLocaleLowerCase()!;
           const inputName = additionalData?.name?.toLocaleLowerCase();
           if (itemName === inputName) return;
-          return inputName && itemName.includes(inputName);
+          return (
+            inputName && itemName.includes(inputName) && itemName !== inputName
+          );
         })
         .slice(0, 5);
 
       setFilteredResults(filteredAdditionals);
+      setShowFilteredResults(true);
+    } else {
+      setFilteredResults([]);
+      setShowFilteredResults(false);
     }
   };
 
@@ -109,12 +121,11 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
         );
 
         if (response?.data?.product) {
-          setProductData({
-            ...productData,
-            additional: response.data.product.additional,
-          });
+          setProductData((state: any) => ({
+            ...state,
+            additional: [...state.additional, response.data.product.additional],
+          }));
 
-          console.log('>>>>>>>>>>>>>>>>>>>>', productData);
           setShowToast(true);
           setToastMessageType(IToastType.success);
           setToastMessage('Produto criado!');
@@ -142,10 +153,10 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
             `/product/${productId}/${response?.data.product.id}`
           );
 
-          setProductData({
-            ...productData,
-            additional: relatesAdditional.data.product.additional,
-          });
+          setProductData((state: any) => ({
+            ...state,
+            additional: [...state.additional, response.data.product.additional],
+          }));
 
           setShowToast(true);
           setToastMessageType(IToastType.success);
@@ -188,11 +199,13 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
             type='text'
             placeholder='Nome'
             required
-            defaultValue={additionalData?.name}
             {...register('name')}
+            value={additionalData?.name}
             onChange={(e) => handleSearch(e.target.value)}
           />
-          <ListGroup style={{ display: filteredResults ? 'block' : 'none' }}>
+          <ListGroup
+            style={{ display: showFilteredResults ? 'block' : 'none' }}
+          >
             {filteredResults ? (
               filteredResults.map((item, idx) => {
                 return (
@@ -242,9 +255,9 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
       <Card className='text-center'>
         <Card.Body>
           <Card.Title>Lista de Adicionais</Card.Title>
-          {productData?.additional?.map((item, idx) => {
-            return (
-              <ListGroup variant='flush'>
+          <ListGroup variant='flush'>
+            {productData?.additional?.map((item, idx) => {
+              return (
                 <ListGroup.Item
                   key={idx}
                   style={{ display: 'flex', justifyContent: 'space-between' }}
@@ -252,9 +265,9 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
                   {item.name}
                   <div>R${item.price}</div>
                 </ListGroup.Item>
-              </ListGroup>
-            );
-          })}
+              );
+            })}
+          </ListGroup>
         </Card.Body>
       </Card>
     </>
