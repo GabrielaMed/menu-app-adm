@@ -1,4 +1,5 @@
 import { IAdditional } from './Additional';
+import { IImage } from './Image';
 
 export interface IProduct {
   id?: string;
@@ -6,5 +7,5 @@ export interface IProduct {
   description?: string;
   price?: number;
   additional?: IAdditional[];
-  image?: FileList;
+  image?: IImage[];
 }

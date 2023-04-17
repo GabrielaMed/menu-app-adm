@@ -29,7 +29,15 @@ export const NewProduct = () => {
 
           setProductData({ name, description, price });
         }
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setShowToast(true);
+          setToastMessageType(IToastType.error);
+          setToastMessage(`Error: ${err?.response?.data}`);
+        }
+      }
 
+      try {
         const responseAdditional = await api.get(
           `product/${productId}/additionals`
         );
@@ -40,9 +48,18 @@ export const NewProduct = () => {
             additional: responseAdditional.data.additionals,
           }));
         }
+      } catch (err) {
+        if (err instanceof AxiosError) {
+          setShowToast(true);
+          setToastMessageType(IToastType.error);
+          setToastMessage(`Error: ${err?.response?.data}`);
+        }
+      }
 
+      try {
         const responseImages = await api.get(`product/${productId}/image`);
-        if (responseImages.data.lenght > 0) {
+
+        if (responseImages.data) {
           setProductData((state: any) => ({
             ...state,
             image: responseImages.data,
@@ -55,6 +72,7 @@ export const NewProduct = () => {
           setToastMessage(`Error: ${err?.response?.data}`);
         }
       }
+      console.log('dataaaa', productData);
     };
 
     if (productId) {

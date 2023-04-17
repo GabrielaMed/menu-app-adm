@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { IProduct } from '../../../../utils/Interface/Product';
-import { Form } from 'react-bootstrap';
+import { Carousel, Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import { ProductSchema } from '../../../../validation/productValidation';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -134,10 +134,8 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
           <Form.Control
             type='file'
             placeholder='Insira uma foto'
-            // name='image'
             accept='image/png, image/jpeg, image/pjpeg'
             multiple
-            // onChange={(e) => console.log((e.target as HTMLInputElement).files!)}
             required
             {...register('image')}
             onChange={(e) =>
@@ -145,6 +143,21 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
             }
           />
         </Form.Group>
+
+        <Carousel style={{ background: 'black', marginBottom: '1rem' }}>
+          {productData?.image?.map((item, idx) => {
+            return (
+              <Carousel.Item key={idx}>
+                <img
+                  className='d-block w-100'
+                  style={{ objectFit: 'contain', height: '15rem' }}
+                  src={process.env.REACT_APP_IMAGE_URL + item?.fileName}
+                  alt=''
+                />
+              </Carousel.Item>
+            );
+          })}
+        </Carousel>
 
         <Form.Group className='mb-3'>
           <Form.Label>Nome:</Form.Label>
