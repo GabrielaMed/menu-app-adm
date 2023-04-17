@@ -23,6 +23,7 @@ interface Props {
 export const ProductAdditional = ({ productData, setProductData }: Props) => {
   const [additionalData, setAdditionalData] = useState<IAdditional>({
     name: '',
+    price: 0,
   });
   const [additionalsList, setAdditionalsList] = useState<IAdditional[]>([]);
   const [filteredResults, setFilteredResults] = useState<IAdditional[]>([]);
@@ -40,7 +41,6 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
     formState: { errors },
     reset,
     setFocus,
-    trigger,
   } = useForm<AdditionalSchema>({
     resolver: yupResolver(additionalSchema),
     mode: 'onTouched',
@@ -75,15 +75,18 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
   }, [productId]);
 
   const handleSearch = (name: string) => {
-    setShowFilteredResults(false);
-    setAdditionalData({ name });
+    const additionalExists = additionalsList.find((item) => item.name === name);
+    if (additionalExists) {
+      setAdditionalData({ name, price: additionalExists?.price });
+    } else {
+      setAdditionalData({ name });
+    }
+    reset();
+  };
 
-    setTimeout(() => {
-      trigger('name');
-    }, 500);
-
+  useEffect(() => {
     if (additionalData?.name) {
-      const filteredAdditionals = additionalsList
+      const filteredAdditionals: IAdditional[] = additionalsList
         .filter((item) => {
           const itemName = item?.name?.toLocaleLowerCase()!;
           const inputName = additionalData?.name?.toLocaleLowerCase();
@@ -100,7 +103,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
       setFilteredResults([]);
       setShowFilteredResults(false);
     }
-  };
+  }, [additionalData]);
 
   const handleRegister = async (data: any) => {
     const companyHasProduct = additionalsList?.find(
@@ -113,17 +116,21 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
         (item) =>
           item.name?.toLocaleLowerCase() === data?.name?.toLocaleLowerCase()
       )
-    ) {
-    } else if (companyHasProduct) {
+    )
+      return;
+    else if (companyHasProduct) {
       try {
         const response = await api.post(
           `/product/${productId}/${companyHasProduct.id}`
         );
 
         if (response?.data?.product) {
+          const oldAdditionals = productData?.additional
+            ? productData?.additional
+            : [];
           setProductData((state: any) => ({
             ...state,
-            additional: [...state.additional, response.data.product.additional],
+            additional: [...oldAdditionals, response.data.product.additional],
           }));
 
           setShowToast(true);
@@ -153,9 +160,16 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
             `/product/${productId}/${response?.data.product.id}`
           );
 
+          const oldAdditionals = productData?.additional
+            ? productData?.additional
+            : [];
+
           setProductData((state: any) => ({
             ...state,
-            additional: [...state.additional, response.data.product.additional],
+            additional: [
+              ...oldAdditionals,
+              relatesAdditional.data.product.additional,
+            ],
           }));
 
           setShowToast(true);
@@ -211,7 +225,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
                 return (
                   <ListGroup.Item
                     key={idx}
-                    onClick={() => handleSearch(item.name!)}
+                    onClick={(e) => handleSearch(item.name!)}
                   >
                     {item.name}
                   </ListGroup.Item>
@@ -236,8 +250,8 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
             required
             step='0.01'
             min='0'
-            // value={additionalData?.price}
             {...register('price')}
+            value={additionalData?.price}
           />
           {errors.price && (
             <span style={{ color: 'red', marginTop: '0.5rem' }}>
