@@ -9,13 +9,25 @@ export const Container = styled.div`
 export const Content = styled.div`
   height: 100%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding-top: 1rem;
   padding-inline: 2rem;
+  gap: 1rem;
+`;
+
+export const Cards = styled.div`
   gap: 1rem;
   display: flex;
   box-sizing: border-box;
   justify-content: space-between;
   flex-wrap: wrap;
+`;
+
+export const Title = styled.h1`
+  color: black;
 `;
 
 export const Card = styled.div`
@@ -58,4 +70,16 @@ export const FooterBox = styled.div`
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
+`;
+
+export const CartBox = styled.button`
+  all: unset;
+  background: #4b2995;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 `;
