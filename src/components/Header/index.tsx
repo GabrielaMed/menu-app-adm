@@ -1,4 +1,3 @@
-import { ICompany } from '../../utils/Interface/Company';
 import { Container, Title } from './style';
 
 interface Props {
