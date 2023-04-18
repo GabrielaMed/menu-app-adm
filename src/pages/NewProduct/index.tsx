@@ -72,7 +72,6 @@ export const NewProduct = () => {
           setToastMessage(`Error: ${err?.response?.data}`);
         }
       }
-      console.log('dataaaa', productData);
     };
 
     if (productId) {
