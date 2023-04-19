@@ -2,8 +2,10 @@ import { AxiosError } from 'axios';
 import { Header } from '../../components/Header';
 import {
   Card,
+  Cards,
   Container,
   Content,
+  DescriptionBox,
   FooterBox,
   ImageBox,
   TextBox,
@@ -26,6 +28,7 @@ export const ProductList = () => {
   );
   const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
+  const [productsWImageData, setProductsWImageData] = useState<IProduct[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,6 +52,37 @@ export const ProductList = () => {
     }
   }, [companyId]);
 
+  useEffect(() => {
+    const updateData = async () => {
+      const productsWithImages = [];
+
+      for (let i = 0; i < productsData.length; i++) {
+        const product = productsData[i];
+        const productId = product.id;
+
+        try {
+          const responseImages = await api.get(`product/${productId}/image`);
+          if (responseImages.data) {
+            product.image = responseImages.data;
+          }
+        } catch (err) {
+          console.log(err);
+          if (err instanceof AxiosError) {
+            setShowToast(true);
+            setToastMessageType(IToastType.error);
+            setToastMessage(`Error: ${err?.response?.data}`);
+          }
+        }
+
+        productsWithImages.push(product);
+      }
+
+      setProductsWImageData(productsWithImages);
+    };
+
+    updateData();
+  }, [productsData]);
+
   return (
     <Container>
       <Header pageName='Products' />
@@ -64,30 +98,46 @@ export const ProductList = () => {
       )}
       {!loading && (
         <Content>
-          {productsData?.map((product) => {
-            return (
-              <Card key={product.id}>
-                <ImageBox></ImageBox>
-                <TextBox>
-                  <span>
-                    <strong>{product.name}</strong>
-                  </span>
-                  <span>{product.description}</span>
-                </TextBox>
-                <FooterBox>
-                  <span>
-                    R$ <strong>{product.price}</strong>
-                  </span>
-                  <MdModeEdit
-                    size={24}
-                    onClick={() =>
-                      navigate(`/${companyId}/product/${product.id}`)
-                    }
-                  />
-                </FooterBox>
-              </Card>
-            );
-          })}
+          <Cards>
+            {productsWImageData.length > 0 &&
+              productsWImageData?.map((product) => (
+                <Card key={product.id}>
+                  {product?.image ? (
+                    <ImageBox>
+                      <img
+                        className='d-block w-100'
+                        style={{ objectFit: 'contain', height: '15rem' }}
+                        src={
+                          process.env.REACT_APP_IMAGE_URL +
+                          product?.image[0]?.fileName
+                        }
+                        alt=''
+                      />
+                    </ImageBox>
+                  ) : (
+                    <ImageBox></ImageBox>
+                  )}
+
+                  <TextBox>
+                    <span>
+                      <strong>{product.name}</strong>
+                    </span>
+                    <DescriptionBox>{product.description}</DescriptionBox>
+                  </TextBox>
+                  <FooterBox>
+                    <span>
+                      R$ <strong>{product.price}</strong>
+                    </span>
+                    <MdModeEdit
+                      size={24}
+                      onClick={() =>
+                        navigate(`/${companyId}/product/${product.id}`)
+                      }
+                    />
+                  </FooterBox>
+                </Card>
+              ))}
+          </Cards>
         </Content>
       )}
     </Container>
