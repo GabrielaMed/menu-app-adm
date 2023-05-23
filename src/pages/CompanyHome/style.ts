@@ -19,14 +19,14 @@ export const Content = styled.div`
 `;
 
 export const Card = styled.div`
-  width: 5rem;
-  height: 5rem;
+  width: 4.5rem;
+  height: 4.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
   overflow: hidden;
-  background-color: #ecf9ee;
+  background-color: #4b2995;
   border-radius: 5px;
   box-shadow: 4px 4px 11px 0px rgba(0, 0, 0, 0.2);
 `;
