@@ -2,7 +2,7 @@ import { api } from '../../services/api';
 import { IProduct } from '../Interface/Product';
 
 class ProductImageRegistration {
-  async handle(productId: string, images: IProduct['image']) {
+  async handle(productId: string, images: IProduct['Image']) {
     if (!images) return;
     const config = {
       headers: { 'Content-Type': 'multipart/form-data' },

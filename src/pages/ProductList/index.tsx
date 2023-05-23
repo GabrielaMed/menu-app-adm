@@ -1,5 +1,4 @@
 import { AxiosError } from 'axios';
-import { Header } from '../../components/Header';
 import {
   Card,
   Cards,
@@ -8,18 +7,21 @@ import {
   DescriptionBox,
   FooterBox,
   ImageBox,
+  Navbar,
   TextBox,
 } from './style';
 import { IToastType } from '../../utils/Interface/Toast';
 import { api } from '../../services/api';
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ReactLoading from 'react-loading';
 import { IProduct } from '../../utils/Interface/Product';
-import { MdModeEdit } from 'react-icons/md';
+import { MdArrowBack, MdModeEdit } from 'react-icons/md';
+import { GlobalContext } from '../../shared/GlobalContext';
+import { ToastMessage } from '../../components/Toast';
 
 export const ProductList = () => {
-  const { companyId } = useParams();
+  const { companyId, setProductId } = useContext(GlobalContext);
   const [loading, setLoading] = useState(false);
   const [productsData, setProductsData] = useState<IProduct[]>([]);
   const [showToast, setShowToast] = useState(false);
@@ -28,17 +30,18 @@ export const ProductList = () => {
   );
   const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
-  const [productsWImageData, setProductsWImageData] = useState<IProduct[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await api.get(`${companyId}/product`);
+
         if (response.data) {
           setProductsData(response.data);
+          setLoading(false);
         }
       } catch (err) {
-        console.log(err);
         if (err instanceof AxiosError) {
           setShowToast(true);
           setToastMessageType(IToastType.error);
@@ -50,66 +53,57 @@ export const ProductList = () => {
     if (companyId) {
       fetchData();
     }
+    // eslint-disable-next-line
   }, [companyId]);
 
-  useEffect(() => {
-    const updateData = async () => {
-      const productsWithImages = [];
-
-      for (let i = 0; i < productsData.length; i++) {
-        const product = productsData[i];
-        const productId = product.id;
-
-        try {
-          const responseImages = await api.get(`product/${productId}/image`);
-          if (responseImages.data) {
-            product.image = responseImages.data;
-          }
-        } catch (err) {
-          console.log(err);
-          if (err instanceof AxiosError) {
-            setShowToast(true);
-            setToastMessageType(IToastType.error);
-            setToastMessage(`Error: ${err?.response?.data}`);
-          }
-        }
-
-        productsWithImages.push(product);
-      }
-
-      setProductsWImageData(productsWithImages);
-    };
-
-    updateData();
-  }, [productsData]);
-
   return (
-    <Container>
-      <Header pageName='Products' />
-      {loading && (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <ReactLoading
-            type={'cylon'}
-            color={'#1b4332'}
-            height={'150px'}
-            width={'150px'}
-          />
-        </div>
-      )}
-      {!loading && (
-        <Content>
-          <Cards>
-            {productsWImageData.length > 0 &&
-              productsWImageData?.map((product) => (
-                <Card key={product.id}>
-                  {product?.image ? (
+    <>
+      <ToastMessage
+        setShowToast={setShowToast}
+        showToast={showToast}
+        toastMessage={toastMessage}
+        toastMessageType={toastMessageType}
+      />
+      <Container>
+        <Navbar>
+          <span>
+            <MdArrowBack
+              size={24}
+              style={{ cursor: 'pointer' }}
+              onClick={() => navigate(`/`)}
+            />
+          </span>
+          <span>Produtos</span>
+        </Navbar>
+        {loading && (
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <ReactLoading
+              type={'cylon'}
+              color={'#1b4332'}
+              height={'150px'}
+              width={'150px'}
+            />
+          </div>
+        )}
+        {!loading && (
+          <Content>
+            <Cards>
+              {productsData?.map((product) => (
+                <Card
+                  key={product.id}
+                  onClick={() => {
+                    setProductId(String(product.id));
+                    navigate(`/product`);
+                  }}
+                >
+                  {product?.Image ? (
                     <ImageBox>
                       <img
                         className='d-block w-100'
                         style={{ objectFit: 'contain', height: '15rem' }}
                         src={
                           process.env.REACT_APP_IMAGE_URL +
-                          product?.image[0]?.fileName
+                          product?.Image[0]?.fileName
                         }
                         alt=''
                       />
@@ -126,20 +120,21 @@ export const ProductList = () => {
                   </TextBox>
                   <FooterBox>
                     <span>
-                      R$ <strong>{product.price}</strong>
+                      <strong>
+                        {Number(product.price).toLocaleString('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        })}
+                      </strong>
                     </span>
-                    <MdModeEdit
-                      size={24}
-                      onClick={() =>
-                        navigate(`/${companyId}/product/${product.id}`)
-                      }
-                    />
+                    <MdModeEdit size={24} />
                   </FooterBox>
                 </Card>
               ))}
-          </Cards>
-        </Content>
-      )}
-    </Container>
+            </Cards>
+          </Content>
+        )}
+      </Container>
+    </>
   );
 };

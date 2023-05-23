@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Header } from '../../components/Header';
-import { ChosenTab, Container, Content, Tab } from './style';
+import { useContext, useEffect, useState } from 'react';
+import { ChosenTab, Container, Content, Navbar, Tab } from './style';
 import { ProductInfo } from './components/ProductInfo';
 import { ProductAdditional } from './components/ProductAdditional';
 import { IProduct } from '../../utils/Interface/Product';
-import { useParams } from 'react-router-dom';
 import { api } from '../../services/api';
 import { IToastType } from '../../utils/Interface/Toast';
 import { AxiosError } from 'axios';
+import { GlobalContext } from '../../shared/GlobalContext';
+import { MdArrowBack } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
+import { ToastMessage } from '../../components/Toast';
 
 export const NewProduct = () => {
   const [chosenTab, setchosenTab] = useState('Products');
@@ -17,7 +19,8 @@ export const NewProduct = () => {
     IToastType.unknow
   );
   const [toastMessage, setToastMessage] = useState('');
-  const { productId } = useParams();
+  const { productId } = useContext(GlobalContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,45 +28,14 @@ export const NewProduct = () => {
         const response = await api.get(`product/${productId}`);
 
         if (response.data) {
-          const { name, description, price } = response.data[0];
-
-          setProductData({ name, description, price });
-        }
-      } catch (err) {
-        if (err instanceof AxiosError) {
-          setShowToast(true);
-          setToastMessageType(IToastType.error);
-          setToastMessage(`Error: ${err?.response?.data}`);
-        }
-      }
-
-      try {
-        const responseAdditional = await api.get(
-          `product/${productId}/additionals`
-        );
-
-        if (responseAdditional.data.additionals) {
-          setProductData((prevState: IProduct) => ({
-            ...prevState,
-            additional: responseAdditional.data.additionals,
+          const { id, name, description, price, Additional_in_Product, Image } =
+            response.data[0];
+          const additional = Additional_in_Product.map((item: any) => ({
+            ...item.additional,
+            quantity: 0,
           }));
-        }
-      } catch (err) {
-        if (err instanceof AxiosError) {
-          setShowToast(true);
-          setToastMessageType(IToastType.error);
-          setToastMessage(`Error: ${err?.response?.data}`);
-        }
-      }
 
-      try {
-        const responseImages = await api.get(`product/${productId}/image`);
-
-        if (responseImages.data) {
-          setProductData((state: any) => ({
-            ...state,
-            image: responseImages.data,
-          }));
+          setProductData({ id, name, description, price, Image, additional });
         }
       } catch (err) {
         if (err instanceof AxiosError) {
@@ -80,46 +52,63 @@ export const NewProduct = () => {
   }, [productId]);
 
   return (
-    <Container>
-      <Header pageName=' Product' />
-      {productId ? (
-        <Tab>
-          <ChosenTab onClick={() => setchosenTab('Products')}>
-            Produto
-          </ChosenTab>
-
-          <ChosenTab onClick={() => setchosenTab('Additional')}>
-            Adicionais
-          </ChosenTab>
-        </Tab>
-      ) : (
-        <Tab>
-          <ChosenTab onClick={() => setchosenTab('Products')}>
-            Produto
-          </ChosenTab>
-        </Tab>
-      )}
-
-      <Content>
+    <>
+      <ToastMessage
+        setShowToast={setShowToast}
+        showToast={showToast}
+        toastMessage={toastMessage}
+        toastMessageType={toastMessageType}
+      />
+      <Container>
+        <Navbar>
+          <span>
+            <MdArrowBack
+              size={24}
+              style={{ cursor: 'pointer' }}
+              onClick={() => navigate(`/products`)}
+            />
+          </span>
+          <span>Produtos</span>
+        </Navbar>
         {productId ? (
-          chosenTab === 'Products' ? (
+          <Tab>
+            <ChosenTab onClick={() => setchosenTab('Products')}>
+              Produto
+            </ChosenTab>
+
+            <ChosenTab onClick={() => setchosenTab('Additional')}>
+              Adicionais
+            </ChosenTab>
+          </Tab>
+        ) : (
+          <Tab>
+            <ChosenTab onClick={() => setchosenTab('Products')}>
+              Produto
+            </ChosenTab>
+          </Tab>
+        )}
+
+        <Content>
+          {productId ? (
+            chosenTab === 'Products' ? (
+              <ProductInfo
+                productData={productData!}
+                setProductData={setProductData}
+              />
+            ) : (
+              <ProductAdditional
+                productData={productData!}
+                setProductData={setProductData}
+              />
+            )
+          ) : (
             <ProductInfo
               productData={productData!}
               setProductData={setProductData}
             />
-          ) : (
-            <ProductAdditional
-              productData={productData!}
-              setProductData={setProductData}
-            />
-          )
-        ) : (
-          <ProductInfo
-            productData={productData!}
-            setProductData={setProductData}
-          />
-        )}
-      </Content>
-    </Container>
+          )}
+        </Content>
+      </Container>
+    </>
   );
 };
