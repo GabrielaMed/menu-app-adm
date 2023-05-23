@@ -1,6 +1,6 @@
 import { Button, Card, Form } from 'react-bootstrap';
 import ListGroup from 'react-bootstrap/ListGroup';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { IAdditional } from '../../../../utils/Interface/Additional';
 import { IProduct } from '../../../../utils/Interface/Product';
 import { useForm } from 'react-hook-form';
@@ -13,7 +13,7 @@ import { ToastMessage } from '../../../../components/Toast';
 import { IToastType } from '../../../../utils/Interface/Toast';
 import { api } from '../../../../services/api';
 import { AxiosError } from 'axios';
-import { useParams } from 'react-router-dom';
+import { GlobalContext } from '../../../../shared/GlobalContext';
 
 interface Props {
   productData: IProduct;
@@ -32,7 +32,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
     IToastType.unknow
   );
   const [toastMessage, setToastMessage] = useState('');
-  const { productId, companyId } = useParams();
+  const { productId, companyId } = useContext(GlobalContext);
   const [showFilteredResults, setShowFilteredResults] = useState(false);
 
   const {
@@ -72,6 +72,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
     if (productId) {
       fetchData();
     }
+    // eslint-disable-next-line
   }, [productId]);
 
   const handleSearch = (name: string) => {
@@ -89,7 +90,9 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
       const filteredAdditionals: IAdditional[] = additionalsList
         .filter((item) => {
           const itemName = item?.name?.toLocaleLowerCase()!;
+          // eslint-disable-next-line
           const inputName = additionalData?.name?.toLocaleLowerCase();
+          // eslint-disable-next-line
           if (itemName === inputName) return;
           return (
             inputName && itemName.includes(inputName) && itemName !== inputName
@@ -103,6 +106,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
       setFilteredResults([]);
       setShowFilteredResults(false);
     }
+    // eslint-disable-next-line
   }, [additionalData]);
 
   const handleRegister = async (data: any) => {
@@ -135,7 +139,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
 
           setShowToast(true);
           setToastMessageType(IToastType.success);
-          setToastMessage('Produto criado!');
+          setToastMessage('Adicional criado!');
         }
       } catch (err) {
         if (err instanceof AxiosError) {
@@ -174,7 +178,7 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
 
           setShowToast(true);
           setToastMessageType(IToastType.success);
-          setToastMessage('Produto criado!');
+          setToastMessage('Adicional criado!');
         }
       } catch (err) {
         if (err instanceof AxiosError) {
@@ -260,7 +264,13 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
           )}
         </Form.Group>
         <Form.Group className='mb-3'>
-          <Button variant='primary' type='submit'>
+          <Button
+            style={{
+              backgroundColor: '#4B2995',
+              border: '1px  solid transparent',
+            }}
+            type='submit'
+          >
             Adicionar
           </Button>
         </Form.Group>
@@ -277,7 +287,12 @@ export const ProductAdditional = ({ productData, setProductData }: Props) => {
                   style={{ display: 'flex', justifyContent: 'space-between' }}
                 >
                   {item.name}
-                  <div>R${item.price}</div>
+                  <div>
+                    {Number(item.price).toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    })}
+                  </div>
                 </ListGroup.Item>
               );
             })}

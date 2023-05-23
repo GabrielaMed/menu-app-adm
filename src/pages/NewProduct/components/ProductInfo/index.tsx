@@ -5,12 +5,13 @@ import Button from 'react-bootstrap/Button';
 import { ProductSchema } from '../../../../validation/productValidation';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { api } from '../../../../services/api';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { IToastType } from '../../../../utils/Interface/Toast';
 import { ToastMessage } from '../../../../components/Toast';
 import { AxiosError } from 'axios';
 import { productImageRegistration } from '../../../../utils/productImageRegistration';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { GlobalContext } from '../../../../shared/GlobalContext';
 
 interface Props {
   productData: IProduct;
@@ -32,7 +33,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
   );
   const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
-  const { companyId, productId } = useParams();
+  const { companyId, productId } = useContext(GlobalContext);
 
   const uploadImages = (files: any) => {
     let formData = new FormData();
@@ -59,7 +60,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
         if (response?.data?.product) {
           await productImageRegistration.handle(
             response?.data?.product?.id,
-            productData.image
+            productData.Image
           );
 
           setShowToast(true);
@@ -99,7 +100,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
         if (response?.data?.product) {
           await productImageRegistration.handle(
             response?.data?.product?.id,
-            productData.image
+            productData.Image
           );
 
           setShowToast(true);
@@ -145,12 +146,12 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
         </Form.Group>
 
         <Carousel style={{ background: 'black', marginBottom: '1rem' }}>
-          {productData?.image?.map((item, idx) => {
+          {productData?.Image?.map((item, idx) => {
             return (
               <Carousel.Item key={idx}>
                 <img
                   className='d-block w-100'
-                  style={{ objectFit: 'contain', height: '15rem' }}
+                  style={{ objectFit: 'cover', height: '15rem' }}
                   src={process.env.REACT_APP_IMAGE_URL + item?.fileName}
                   alt=''
                 />
@@ -210,7 +211,14 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
           )}
         </Form.Group>
 
-        <Button variant='primary' type='submit' disabled={isSubmitting}>
+        <Button
+          style={{
+            backgroundColor: '#4B2995',
+            border: '1px  solid transparent',
+          }}
+          type='submit'
+          disabled={isSubmitting}
+        >
           {productId ? 'Salvar' : 'Criar'}
         </Button>
       </Form>
