@@ -7,8 +7,8 @@ import { useContext, useEffect, useState } from 'react';
 import { ICompany } from '../../utils/Interface/Company';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MdOutlineFastfood, MdOutlineReceipt } from 'react-icons/md';
-import { ProductList } from '../ProductList';
 import { GlobalContext } from '../../shared/GlobalContext';
+import ReactLoading from 'react-loading';
 
 export const CompanyHome = () => {
   const { companyIdURL } = useParams();
@@ -20,14 +20,21 @@ export const CompanyHome = () => {
   const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
   const { setCompanyId, companyId } = useContext(GlobalContext);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     if (companyIdURL) {
       setCompanyId(companyIdURL ?? '');
-
       navigate('/');
     }
   }, [companyIdURL]);
+
+  useEffect(() => {
+    if (companyId) {
+      setLoading(false);
+    }
+  }, [companyId]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,25 +57,38 @@ export const CompanyHome = () => {
       fetchData();
     }
   }, [companyId]);
+
   return (
     <Container>
       <Header pageName='Home' />
-      <Content>
-        <Card>
-          <MdOutlineFastfood
-            size={24}
-            color='white'
-            onClick={() => navigate(`/products`)}
+      {loading && (
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <ReactLoading
+            type={'cylon'}
+            color={'#4B2995'}
+            height={'150px'}
+            width={'150px'}
           />
-        </Card>
-        <Card>
-          <MdOutlineReceipt
-            size={24}
-            color='white'
-            onClick={() => navigate(`/orders`)}
-          />
-        </Card>
-      </Content>
+        </div>
+      )}
+      {!loading && (
+        <Content>
+          <Card>
+            <MdOutlineFastfood
+              size={24}
+              color='white'
+              onClick={() => navigate(`/products`)}
+            />
+          </Card>
+          <Card>
+            <MdOutlineReceipt
+              size={24}
+              color='white'
+              onClick={() => navigate(`/orders`)}
+            />
+          </Card>
+        </Content>
+      )}
     </Container>
   );
 };
