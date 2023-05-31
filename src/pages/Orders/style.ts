@@ -42,3 +42,11 @@ export const Content = styled.div`
   padding-inline: 2rem;
   gap: 1rem;
 `;
+
+export const OrderContainer = styled.div`
+  width: 100%;
+  height: 8rem;
+  border-radius: 6px;
+  background-color: #f3f2f2;
+  padding: 1rem;
+`;
