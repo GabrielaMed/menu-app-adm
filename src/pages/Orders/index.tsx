@@ -1,15 +1,28 @@
 import { AxiosError } from 'axios';
-import { Container, Content, Navbar, OrderContainer } from './style';
+import {
+  Container,
+  Content,
+  Navbar,
+  OrderContainer,
+  OrderFooter,
+  OrderHeader,
+} from './style';
 import { IToastType } from '../../utils/Interface/Toast';
 import { api } from '../../services/api';
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactLoading from 'react-loading';
-import { IProduct } from '../../utils/Interface/Product';
-import { MdArrowBack } from 'react-icons/md';
+import {
+  MdArrowBack,
+  MdDeliveryDining,
+  MdPerson,
+  MdRestaurantMenu,
+  MdSoupKitchen,
+} from 'react-icons/md';
 import { GlobalContext } from '../../shared/GlobalContext';
 import { ToastMessage } from '../../components/Toast';
 import { IOrder } from '../../utils/Interface/Order';
+import { OrderStatus } from '../../utils/Enum/OrderStatus';
 
 export const Orders = () => {
   const { companyId } = useContext(GlobalContext);
@@ -55,8 +68,36 @@ export const Orders = () => {
       minute: '2-digit',
     };
     const date = new Date(dateTime);
-    return date.toLocaleString('pt-BR', options);
+    return date.toLocaleTimeString('pt-BR', options);
   };
+
+  const getOrderStatusIcon = (status: OrderStatus) => {
+    switch (status) {
+      case OrderStatus.canceladoCliente:
+        return <MdPerson color='red' />;
+      case OrderStatus.iniciado:
+        return <MdPerson color='orange' />;
+      case OrderStatus.enviado:
+        return <MdPerson color='green' />;
+
+      case OrderStatus.em_producao:
+        return <MdSoupKitchen color='orange' />;
+      case OrderStatus.pronto:
+        return <MdSoupKitchen color='green' />;
+
+      case OrderStatus.emRota:
+        return <MdDeliveryDining color='orange' />;
+      case OrderStatus.entregue:
+        return <MdDeliveryDining color='green' />;
+
+      case OrderStatus.canceladoRestaurante:
+        return <MdRestaurantMenu color='red' />;
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <ToastMessage
@@ -89,11 +130,29 @@ export const Orders = () => {
         {!loading && (
           <Content>
             {ordersData?.map((order, idx) => (
-              <OrderContainer key={idx}>
-                <strong>N° Pedido {order.orderNumber}</strong>
-                <p>Data: {formatDate(order.dateTimeOrder)} </p>
-                <p>N° Mesa {order.tableNumber}</p>
-                <p>Status: {order.statusOrder}</p>
+              <OrderContainer
+                key={idx}
+                onClick={() => navigate('/orderDetails')}
+              >
+                <OrderHeader>
+                  <strong>N° Pedido: {order.orderNumber}</strong>
+
+                  <strong>Mesa: {order.tableNumber}</strong>
+                </OrderHeader>
+                <span>Data: {formatDate(order.dateTimeOrder)} </span>
+                <OrderFooter>
+                  <span>
+                    Total:{' '}
+                    {Number(order.total).toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    })}
+                  </span>
+                  <span>
+                    Status: {order.statusOrder}{' '}
+                    {getOrderStatusIcon(order.statusOrder)}
+                  </span>
+                </OrderFooter>
               </OrderContainer>
             ))}
           </Content>

@@ -45,8 +45,27 @@ export const Content = styled.div`
 
 export const OrderContainer = styled.div`
   width: 100%;
-  height: 8rem;
+  height: 8.5rem;
+  box-sizing: border-box;
   border-radius: 6px;
   background-color: #f3f2f2;
   padding: 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.5rem;
+`;
+
+export const OrderHeader = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+`;
+
+export const OrderFooter = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
 `;
