@@ -3,6 +3,7 @@ import { NewProduct } from '../pages/NewProduct';
 import { CompanyHome } from '../pages/CompanyHome';
 import { ProductList } from '../pages/ProductList';
 import { Orders } from '../pages/Orders';
+import { OrderDetails } from '../pages/OrderDetails';
 
 export const AppRoutes = () => (
   <Routes>
@@ -11,5 +12,6 @@ export const AppRoutes = () => (
     <Route path='/products' element={<ProductList />} />
     <Route path='/product' element={<NewProduct />} />
     <Route path='/orders' element={<Orders />} />
+    <Route path='/orderDetails' element={<OrderDetails />} />
   </Routes>
 );
