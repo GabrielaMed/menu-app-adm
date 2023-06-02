@@ -1,11 +1,18 @@
 import { AxiosError } from 'axios';
 import {
+  Card,
   Container,
   Content,
+  Footer,
+  ImageBox,
   Navbar,
-  OrderContainer,
-  OrderFooter,
-  OrderHeader,
+  Order,
+  OrderInfo,
+  OrderInfoAdditionals,
+  OrderInfoButtonsBox,
+  OrderInfoObservation,
+  OrderDetail,
+  ProductInfo,
 } from './style';
 import { IToastType } from '../../utils/Interface/Toast';
 import { api } from '../../services/api';
@@ -25,9 +32,9 @@ import { IOrder } from '../../utils/Interface/Order';
 import { OrderStatus } from '../../utils/Enum/OrderStatus';
 
 export const OrderDetails = () => {
-  const { companyId } = useContext(GlobalContext);
+  const { orderDetailedId } = useContext(GlobalContext);
   const [loading, setLoading] = useState(false);
-  const [ordersData, setOrdersData] = useState<IOrder[]>([]);
+  const [orderData, setOrderData] = useState<IOrder>();
   const [showToast, setShowToast] = useState(false);
   const [toastMessageType, setToastMessageType] = useState<IToastType>(
     IToastType.unknow
@@ -38,10 +45,11 @@ export const OrderDetails = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get(`order/${companyId}`);
+        const response = await api.get(`order/${orderDetailedId}`);
 
         if (response.data) {
-          setOrdersData(response.data);
+          setOrderData(response.data);
+          setLoading(false);
         }
       } catch (err) {
         if (err instanceof AxiosError) {
@@ -52,13 +60,15 @@ export const OrderDetails = () => {
       }
     };
 
-    if (companyId) {
+    if (orderDetailedId) {
+      setLoading(true);
       fetchData();
     }
     // eslint-disable-next-line
-  }, [companyId]);
+  }, [orderDetailedId]);
 
-  const formatDate = (dateTime: string) => {
+  const formatDate = (dateTime: string | undefined) => {
+    if (!dateTime) return;
     const options: Intl.DateTimeFormatOptions = {
       day: '2-digit',
       month: '2-digit',
@@ -70,27 +80,28 @@ export const OrderDetails = () => {
     return date.toLocaleTimeString('pt-BR', options);
   };
 
-  const getOrderStatusIcon = (status: OrderStatus) => {
+  const getOrderStatusIcon = (status: OrderStatus | undefined) => {
+    if (!status) return;
     switch (status) {
       case OrderStatus.canceladoCliente:
-        return <MdPerson color='red' />;
+        return <MdPerson size={24} color='red' />;
       case OrderStatus.iniciado:
-        return <MdPerson color='orange' />;
+        return <MdPerson size={24} color='orange' />;
       case OrderStatus.enviado:
-        return <MdPerson color='green' />;
+        return <MdPerson size={24} color='green' />;
 
       case OrderStatus.em_producao:
-        return <MdSoupKitchen color='orange' />;
+        return <MdSoupKitchen size={24} color='orange' />;
       case OrderStatus.pronto:
-        return <MdSoupKitchen color='green' />;
+        return <MdSoupKitchen size={24} color='green' />;
 
       case OrderStatus.emRota:
-        return <MdDeliveryDining color='orange' />;
+        return <MdDeliveryDining size={24} color='orange' />;
       case OrderStatus.entregue:
-        return <MdDeliveryDining color='green' />;
+        return <MdDeliveryDining size={24} color='green' />;
 
       case OrderStatus.canceladoRestaurante:
-        return <MdRestaurantMenu color='red' />;
+        return <MdRestaurantMenu size={24} color='red' />;
 
       default:
         return null;
@@ -114,7 +125,7 @@ export const OrderDetails = () => {
               onClick={() => navigate(`/orders`)}
             />
           </span>
-          <span>Detalhes Pedido {5}</span>
+          <span>Detalhes Pedido {orderData?.orderNumber}</span>
         </Navbar>
         {loading && (
           <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -128,29 +139,103 @@ export const OrderDetails = () => {
         )}
         {!loading && (
           <Content>
-            {ordersData?.map((order, idx) => (
-              <OrderContainer key={idx}>
-                <OrderHeader>
-                  <strong>N° Pedido: {order.orderNumber}</strong>
+            {orderData?.Order_products
+              ? orderData?.Order_products.map((order, idx) => (
+                  <Card key={idx}>
+                    <Order>
+                      {order.product.Image ? (
+                        <ImageBox>
+                          <img
+                            src={
+                              process.env.REACT_APP_IMAGE_URL! +
+                              order.product.Image[0].fileName
+                            }
+                            alt=''
+                          />
+                        </ImageBox>
+                      ) : null}
+                      <OrderInfo>
+                        <ProductInfo>
+                          {order.product.name}
+                          <strong>
+                            {Number(
+                              (orderData?.Order_products[0].quantity ?? 0) *
+                                (orderData?.Order_products[0].product.price ??
+                                  0)
+                            ).toLocaleString('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
+                            })}
+                          </strong>
+                        </ProductInfo>
+                        {(order.additionals?.length ?? 0) > 0 ? (
+                          <OrderInfoAdditionals>
+                            <strong>Adicionais: </strong>
+                            {Array.isArray(order.additionals)
+                              ? order.additionals.map((additional, idx) => (
+                                  <span key={idx}>
+                                    <span>
+                                      {additional.quantity} - {additional.name}
+                                    </span>
+                                    <span>
+                                      {Number(
+                                        (additional.quantity ?? 0) *
+                                          (additional.price ?? 0)
+                                      ).toLocaleString('pt-BR', {
+                                        style: 'currency',
+                                        currency: 'BRL',
+                                      })}
+                                    </span>
+                                  </span>
+                                ))
+                              : null}
+                          </OrderInfoAdditionals>
+                        ) : null}
 
-                  <strong>Mesa: {order.tableNumber}</strong>
-                </OrderHeader>
-                <span>Data: {formatDate(order.dateTimeOrder)} </span>
-                <OrderFooter>
-                  <span>
-                    Total:{' '}
-                    {Number(order.total).toLocaleString('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL',
-                    })}
-                  </span>
-                  <span>
-                    Status: {order.statusOrder}{' '}
-                    {getOrderStatusIcon(order.statusOrder)}
-                  </span>
-                </OrderFooter>
-              </OrderContainer>
-            ))}
+                        {order.observation ? (
+                          <OrderInfoObservation>
+                            Observação: {order.observation}
+                          </OrderInfoObservation>
+                        ) : null}
+                        <OrderInfoButtonsBox>
+                          Quantidade: {order.quantity}
+                        </OrderInfoButtonsBox>
+                      </OrderInfo>
+                    </Order>
+                  </Card>
+                ))
+              : null}
+
+            <Footer>
+              <OrderDetail>
+                <strong>Mesa: </strong>
+                {orderData?.tableNumber}
+              </OrderDetail>
+
+              <OrderDetail>
+                <strong>Total:</strong>
+
+                <span>
+                  {Number(orderData?.total).toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  })}
+                </span>
+              </OrderDetail>
+              <OrderDetail>
+                <span>
+                  <strong>Status: </strong>
+                </span>
+                <span>
+                  {orderData?.statusOrder}
+                  {getOrderStatusIcon(orderData?.statusOrder)}
+                </span>
+              </OrderDetail>
+              <OrderDetail>
+                <strong>Data: </strong>
+                {formatDate(orderData?.dateTimeOrder)}
+              </OrderDetail>
+            </Footer>
           </Content>
         )}
       </Container>

@@ -6,7 +6,7 @@ export const Container = styled.div`
   box-sizing: border-box;
 `;
 
-export const Navbar = styled.div`
+export const NavbarOrder = styled.div`
   width: 100%;
   height: 4rem;
   border-bottom: 1px solid #e6e5e5;

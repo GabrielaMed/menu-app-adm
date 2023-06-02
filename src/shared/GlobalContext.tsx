@@ -5,6 +5,8 @@ type GlobalContextData = {
   setCompanyId: (companyId: string) => void;
   productId: string;
   setProductId: (productId: string) => void;
+  orderDetailedId: string;
+  setOrderDetailedId: (orderDetailedId: string) => void;
 };
 
 export const GlobalContext = createContext({} as GlobalContextData);
@@ -16,6 +18,7 @@ type Props = {
 export const GlobalContextProvider = ({ children }: Props) => {
   const [companyId, setCompanyId] = useState('');
   const [productId, setProductId] = useState('');
+  const [orderDetailedId, setOrderDetailedId] = useState('');
 
   return (
     <GlobalContext.Provider
@@ -24,6 +27,8 @@ export const GlobalContextProvider = ({ children }: Props) => {
         setCompanyId,
         productId,
         setProductId,
+        orderDetailedId,
+        setOrderDetailedId,
       }}
     >
       {children}

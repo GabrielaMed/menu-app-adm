@@ -2,7 +2,7 @@ import { AxiosError } from 'axios';
 import {
   Container,
   Content,
-  Navbar,
+  NavbarOrder,
   OrderContainer,
   OrderFooter,
   OrderHeader,
@@ -23,25 +23,33 @@ import { GlobalContext } from '../../shared/GlobalContext';
 import { ToastMessage } from '../../components/Toast';
 import { IOrder } from '../../utils/Interface/Order';
 import { OrderStatus } from '../../utils/Enum/OrderStatus';
+import { Alert, Form } from 'react-bootstrap';
 
 export const Orders = () => {
-  const { companyId } = useContext(GlobalContext);
+  const { companyId, setOrderDetailedId } = useContext(GlobalContext);
   const [loading, setLoading] = useState(false);
   const [ordersData, setOrdersData] = useState<IOrder[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<IOrder[]>([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessageType, setToastMessageType] = useState<IToastType>(
     IToastType.unknow
   );
   const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
+  const [showAllOrders, setShowAllOrders] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get(`order/${companyId}`);
+        const response = await api.get(`order/company/${companyId}`);
 
         if (response.data) {
           setOrdersData(response.data);
+          setFilteredOrders(
+            response.data.filter(
+              (order: IOrder) => order.statusOrder === OrderStatus.pronto
+            )
+          );
         }
       } catch (err) {
         if (err instanceof AxiosError) {
@@ -57,7 +65,6 @@ export const Orders = () => {
     }
     // eslint-disable-next-line
   }, [companyId]);
-  console.log('REESPONSE>>>>', ordersData);
 
   const formatDate = (dateTime: string) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -98,6 +105,16 @@ export const Orders = () => {
     }
   };
 
+  const handleFilterOrders = (showAll: boolean) => {
+    if (showAll) {
+      setFilteredOrders(ordersData);
+    } else {
+      setFilteredOrders(
+        ordersData.filter((order) => order.statusOrder === OrderStatus.pronto)
+      );
+    }
+  };
+
   return (
     <>
       <ToastMessage
@@ -107,7 +124,7 @@ export const Orders = () => {
         toastMessageType={toastMessageType}
       />
       <Container>
-        <Navbar>
+        <NavbarOrder>
           <span>
             <MdArrowBack
               size={24}
@@ -116,7 +133,7 @@ export const Orders = () => {
             />
           </span>
           <span>Pedidos</span>
-        </Navbar>
+        </NavbarOrder>
         {loading && (
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <ReactLoading
@@ -129,32 +146,47 @@ export const Orders = () => {
         )}
         {!loading && (
           <Content>
-            {ordersData?.map((order, idx) => (
-              <OrderContainer
-                key={idx}
-                onClick={() => navigate('/orderDetails')}
-              >
-                <OrderHeader>
-                  <strong>N° Pedido: {order.orderNumber}</strong>
+            <Form.Check
+              type='radio'
+              id='showAll'
+              label='Mostrar todos os pedidos'
+              checked={showAllOrders}
+              onChange={() => handleFilterOrders(true)}
+            />
 
-                  <strong>Mesa: {order.tableNumber}</strong>
-                </OrderHeader>
-                <span>Data: {formatDate(order.dateTimeOrder)} </span>
-                <OrderFooter>
-                  <span>
-                    Total:{' '}
-                    {Number(order.total).toLocaleString('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL',
-                    })}
-                  </span>
-                  <span>
-                    Status: {order.statusOrder}{' '}
-                    {getOrderStatusIcon(order.statusOrder)}
-                  </span>
-                </OrderFooter>
-              </OrderContainer>
-            ))}
+            {filteredOrders ? (
+              filteredOrders?.map((order, idx) => (
+                <OrderContainer
+                  key={idx}
+                  onClick={() => {
+                    setOrderDetailedId(order.id);
+                    navigate('/orderDetails');
+                  }}
+                >
+                  <OrderHeader>
+                    <strong>N° Pedido: {order.orderNumber}</strong>
+
+                    <strong>Mesa: {order.tableNumber}</strong>
+                  </OrderHeader>
+                  <span>Data: {formatDate(order.dateTimeOrder)} </span>
+                  <OrderFooter>
+                    <span>
+                      Total:{' '}
+                      {Number(order.total).toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      })}
+                    </span>
+                    <span>
+                      Status: {order.statusOrder}{' '}
+                      {getOrderStatusIcon(order.statusOrder)}
+                    </span>
+                  </OrderFooter>
+                </OrderContainer>
+              ))
+            ) : (
+              <div>Não há nenhum pedido pronto!</div>
+            )}
           </Content>
         )}
       </Container>
