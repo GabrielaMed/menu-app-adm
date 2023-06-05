@@ -43,6 +43,13 @@ export const Content = styled.div`
   gap: 1rem;
 `;
 
+export const FiltersContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
 export const OrderContainer = styled.div`
   width: 100%;
   height: 8.5rem;

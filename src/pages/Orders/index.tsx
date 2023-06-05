@@ -2,6 +2,7 @@ import { AxiosError } from 'axios';
 import {
   Container,
   Content,
+  FiltersContainer,
   NavbarOrder,
   OrderContainer,
   OrderFooter,
@@ -146,15 +147,27 @@ export const Orders = () => {
         )}
         {!loading && (
           <Content>
-            <Form.Check
-              type='radio'
-              id='showAll'
-              label='Mostrar todos os pedidos'
-              checked={showAllOrders}
-              onChange={() => handleFilterOrders(true)}
-            />
+            <FiltersContainer>
+              <strong>Filtros:</strong>
+              <Form.Check
+                type='radio'
+                name='filter'
+                id='showAll'
+                label='Mostrar todos os pedidos'
+                defaultChecked={showAllOrders}
+                onChange={() => handleFilterOrders(true)}
+              />
+              <Form.Check
+                type='radio'
+                name='filter'
+                id='showReady'
+                label='Mostrar apenas pedidos prontos'
+                defaultChecked={!showAllOrders}
+                onChange={() => handleFilterOrders(false)}
+              />
+            </FiltersContainer>
 
-            {filteredOrders ? (
+            {filteredOrders.length > 0 ? (
               filteredOrders?.map((order, idx) => (
                 <OrderContainer
                   key={idx}
