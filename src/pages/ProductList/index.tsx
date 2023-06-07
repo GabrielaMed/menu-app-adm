@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import {
-  ButtonAddOrder,
+  ButtonAddProduct,
   Card,
   Cards,
   Container,
@@ -151,14 +151,14 @@ export const ProductList = () => {
             </Cards>
           </Content>
         )}
-        <ButtonAddOrder
+        <ButtonAddProduct
           onClick={() => {
             setProductId('');
             navigate(`/product`);
           }}
         >
           <MdAdd color='white' size={24} />
-        </ButtonAddOrder>
+        </ButtonAddProduct>
       </Container>
     </>
   );
