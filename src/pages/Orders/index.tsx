@@ -139,7 +139,7 @@ export const Orders = () => {
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <ReactLoading
               type={'cylon'}
-              color={'#1b4332'}
+              color={'#4B2995'}
               height={'150px'}
               width={'150px'}
             />
