@@ -31,7 +31,7 @@ export function ToastMessage({
         {/* <Toast.Header>
           <img src='holder.js/20x20?text=%20' className='rounded me-2' alt='' />
         </Toast.Header> */}
-        <Toast.Body>{toastMessage}</Toast.Body>
+        <Toast.Body style={{ color: 'white' }}>{toastMessage}</Toast.Body>
       </Toast>
     </ToastContainer>
   );
