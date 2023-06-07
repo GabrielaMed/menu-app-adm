@@ -139,3 +139,21 @@ body {
   height: 100vh;
   font-family: "Roboto", sans-serif;
 }
+
+
+.carousel-item {
+  position: relative;
+}
+
+.image-container {
+  position: relative;
+}
+
+.delete-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  color: red;
+  z-index: 10;
+}
