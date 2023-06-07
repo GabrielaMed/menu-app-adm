@@ -59,6 +59,18 @@ export const Title = styled.h1`
   color: black;
 `;
 
+export const SearchBar = styled.input`
+  all: unset;
+  width: 100%;
+  border: 1px solid #e6e5e5;
+  border-radius: 6px;
+  padding: 0.5rem;
+
+  :focus {
+    border: 1px solid #4b2995;
+  }
+`;
+
 export const Card = styled.div`
   width: 10rem;
   height: 13rem;
@@ -69,6 +81,7 @@ export const Card = styled.div`
   box-sizing: border-box;
   background-color: #f3f2f2;
   border-radius: 6px 36px;
+  cursor: pointer;
 `;
 
 export const ImageBox = styled.div`
@@ -111,4 +124,18 @@ export const FooterBox = styled.div`
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
+`;
+
+export const ButtonAddProduct = styled.button`
+  all: unset;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: #4b2995;
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;

@@ -1,5 +1,6 @@
 import { AxiosError } from 'axios';
 import {
+  ButtonAddOrder,
   Card,
   Cards,
   Container,
@@ -8,6 +9,7 @@ import {
   FooterBox,
   ImageBox,
   Navbar,
+  SearchBar,
   TextBox,
 } from './style';
 import { IToastType } from '../../utils/Interface/Toast';
@@ -16,7 +18,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactLoading from 'react-loading';
 import { IProduct } from '../../utils/Interface/Product';
-import { MdArrowBack, MdModeEdit } from 'react-icons/md';
+import { MdAdd, MdArrowBack, MdModeEdit } from 'react-icons/md';
 import { GlobalContext } from '../../shared/GlobalContext';
 import { ToastMessage } from '../../components/Toast';
 
@@ -29,6 +31,7 @@ export const ProductList = () => {
     IToastType.unknow
   );
   const [toastMessage, setToastMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,6 +59,10 @@ export const ProductList = () => {
     // eslint-disable-next-line
   }, [companyId]);
 
+  const filteredProducts = productsData.filter((product) =>
+    product?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <>
       <ToastMessage
@@ -79,7 +86,7 @@ export const ProductList = () => {
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <ReactLoading
               type={'cylon'}
-              color={'#1b4332'}
+              color={'#4B2995'}
               height={'150px'}
               width={'150px'}
             />
@@ -87,53 +94,71 @@ export const ProductList = () => {
         )}
         {!loading && (
           <Content>
+            <SearchBar
+              type='text'
+              placeholder='Pesquisar produto...'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
             <Cards>
-              {productsData?.map((product) => (
-                <Card
-                  key={product.id}
-                  onClick={() => {
-                    setProductId(String(product.id));
-                    navigate(`/product`);
-                  }}
-                >
-                  {product?.Image ? (
-                    <ImageBox>
-                      <img
-                        className='d-block w-100'
-                        style={{ objectFit: 'contain', height: '15rem' }}
-                        src={
-                          process.env.REACT_APP_IMAGE_URL +
-                          product?.Image[0]?.fileName
-                        }
-                        alt=''
-                      />
-                    </ImageBox>
-                  ) : (
-                    <ImageBox></ImageBox>
-                  )}
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((product) => (
+                  <Card
+                    key={product.id}
+                    onClick={() => {
+                      setProductId(String(product.id));
+                      navigate(`/product`);
+                    }}
+                  >
+                    {product?.Image ? (
+                      <ImageBox>
+                        <img
+                          className='d-block w-100'
+                          style={{ objectFit: 'contain', height: '15rem' }}
+                          src={
+                            process.env.REACT_APP_IMAGE_URL +
+                            product?.Image[0]?.fileName
+                          }
+                          alt=''
+                        />
+                      </ImageBox>
+                    ) : (
+                      <ImageBox></ImageBox>
+                    )}
 
-                  <TextBox>
-                    <span>
-                      <strong>{product.name}</strong>
-                    </span>
-                    <DescriptionBox>{product.description}</DescriptionBox>
-                  </TextBox>
-                  <FooterBox>
-                    <span>
-                      <strong>
-                        {Number(product.price).toLocaleString('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL',
-                        })}
-                      </strong>
-                    </span>
-                    <MdModeEdit size={24} />
-                  </FooterBox>
-                </Card>
-              ))}
+                    <TextBox>
+                      <span>
+                        <strong>{product.name}</strong>
+                      </span>
+                      <DescriptionBox>{product.description}</DescriptionBox>
+                    </TextBox>
+                    <FooterBox>
+                      <span>
+                        <strong>
+                          {Number(product.price).toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                          })}
+                        </strong>
+                      </span>
+                      <MdModeEdit size={24} />
+                    </FooterBox>
+                  </Card>
+                ))
+              ) : (
+                <div>Nenhum produto encontrado.</div>
+              )}
             </Cards>
           </Content>
         )}
+        <ButtonAddOrder
+          onClick={() => {
+            setProductId('');
+            navigate(`/product`);
+          }}
+        >
+          <MdAdd color='white' size={24} />
+        </ButtonAddOrder>
       </Container>
     </>
   );
