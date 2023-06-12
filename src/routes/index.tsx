@@ -7,8 +7,8 @@ import { OrderDetails } from '../pages/OrderDetails';
 
 export const AppRoutes = () => (
   <Routes>
-    <Route path='/' element={<CompanyHome />} />
     <Route path='/:companyIdURL' element={<CompanyHome />} />
+    <Route path='/' element={<CompanyHome />} />
     <Route path='/products' element={<ProductList />} />
     <Route path='/product' element={<NewProduct />} />
     <Route path='/orders' element={<Orders />} />
