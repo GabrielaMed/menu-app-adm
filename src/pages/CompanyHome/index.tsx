@@ -28,7 +28,6 @@ export const CompanyHome = () => {
     setLoading(true);
     if (companyIdURL) {
       setCompanyId(companyIdURL ?? '');
-      navigate('/');
     }
     // eslint-disable-next-line
   }, [companyIdURL]);
@@ -36,6 +35,7 @@ export const CompanyHome = () => {
   useEffect(() => {
     if (companyId) {
       setLoading(false);
+      navigate('/');
     }
   }, [companyId]);
 
