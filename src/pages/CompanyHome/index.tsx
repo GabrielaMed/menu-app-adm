@@ -9,9 +9,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { MdOutlineFastfood, MdOutlineReceipt } from 'react-icons/md';
 import { GlobalContext } from '../../shared/GlobalContext';
 import ReactLoading from 'react-loading';
+import { ToastMessage } from '../../components/Toast';
 
 export const CompanyHome = () => {
   const { companyIdURL } = useParams();
+  // eslint-disable-next-line
   const [companyData, setCompanyData] = useState<ICompany>();
   const [showToast, setShowToast] = useState(false);
   const [toastMessageType, setToastMessageType] = useState<IToastType>(
@@ -28,6 +30,7 @@ export const CompanyHome = () => {
       setCompanyId(companyIdURL ?? '');
       navigate('/');
     }
+    // eslint-disable-next-line
   }, [companyIdURL]);
 
   useEffect(() => {
@@ -59,36 +62,44 @@ export const CompanyHome = () => {
   }, [companyId]);
 
   return (
-    <Container>
-      <Header pageName='Home' />
-      {loading && (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <ReactLoading
-            type={'cylon'}
-            color={'#4B2995'}
-            height={'150px'}
-            width={'150px'}
-          />
-        </div>
-      )}
-      {!loading && (
-        <Content>
-          <Card>
-            <MdOutlineFastfood
-              size={24}
-              color='white'
-              onClick={() => navigate(`/products`)}
+    <>
+      <ToastMessage
+        setShowToast={setShowToast}
+        showToast={showToast}
+        toastMessage={toastMessage}
+        toastMessageType={toastMessageType}
+      />
+      <Container>
+        <Header pageName='Home' />
+        {loading && (
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <ReactLoading
+              type={'cylon'}
+              color={'#4B2995'}
+              height={'150px'}
+              width={'150px'}
             />
-          </Card>
-          <Card>
-            <MdOutlineReceipt
-              size={24}
-              color='white'
-              onClick={() => navigate(`/orders`)}
-            />
-          </Card>
-        </Content>
-      )}
-    </Container>
+          </div>
+        )}
+        {!loading && (
+          <Content>
+            <Card>
+              <MdOutlineFastfood
+                size={24}
+                color='white'
+                onClick={() => navigate(`/products`)}
+              />
+            </Card>
+            <Card>
+              <MdOutlineReceipt
+                size={24}
+                color='white'
+                onClick={() => navigate(`/orders`)}
+              />
+            </Card>
+          </Content>
+        )}
+      </Container>
+    </>
   );
 };

@@ -24,7 +24,7 @@ import { GlobalContext } from '../../shared/GlobalContext';
 import { ToastMessage } from '../../components/Toast';
 import { IOrder } from '../../utils/Interface/Order';
 import { OrderStatus } from '../../utils/Enum/OrderStatus';
-import { Alert, Form } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
 export const Orders = () => {
   const { companyId, setOrderDetailedId } = useContext(GlobalContext);
@@ -37,11 +37,13 @@ export const Orders = () => {
   );
   const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
+  // eslint-disable-next-line
   const [showAllOrders, setShowAllOrders] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await api.get(`order/company/${companyId}`);
 
         if (response.data) {
@@ -52,6 +54,7 @@ export const Orders = () => {
             )
           );
         }
+        setLoading(false);
       } catch (err) {
         if (err instanceof AxiosError) {
           setShowToast(true);
@@ -107,6 +110,7 @@ export const Orders = () => {
   };
 
   const handleFilterOrders = (showAll: boolean) => {
+    setLoading(true);
     if (showAll) {
       setFilteredOrders(ordersData);
     } else {
@@ -114,6 +118,8 @@ export const Orders = () => {
         ordersData.filter((order) => order.statusOrder === OrderStatus.pronto)
       );
     }
+
+    setLoading(false);
   };
 
   return (
