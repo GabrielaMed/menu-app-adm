@@ -37,6 +37,7 @@ export const CompanyHome = () => {
       setLoading(false);
       navigate('/');
     }
+    // eslint-disable-next-line
   }, [companyId]);
 
   useEffect(() => {
