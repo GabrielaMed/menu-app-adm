@@ -18,12 +18,7 @@ interface Props {
 }
 
 export const ImageUploadCarousel = ({ productData, setProductData }: Props) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm({
+  const { register } = useForm({
     resolver: yupResolver(ProductSchema),
   });
   const [showToast, setShowToast] = useState(false);
@@ -101,10 +96,17 @@ export const ImageUploadCarousel = ({ productData, setProductData }: Props) => {
     if (productData && productId && relateImage === true) {
       handleRelateImage();
     }
+    // eslint-disable-next-line
   }, [relateImage]);
 
   return (
     <>
+      <ToastMessage
+        setShowToast={setShowToast}
+        showToast={showToast}
+        toastMessage={toastMessage}
+        toastMessageType={toastMessageType}
+      />
       <Form.Group className='mb-3'>
         <Form.Label>Foto:</Form.Label>
         <Form.Control

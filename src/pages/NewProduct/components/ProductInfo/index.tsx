@@ -142,6 +142,7 @@ export const ProductInfo = ({ productData, setProductData }: Props) => {
       handleRelateImage();
       setLoading(false);
     }
+    // eslint-disable-next-line
   }, [relateImage]);
 
   return (
