@@ -52,16 +52,14 @@ export const FiltersContainer = styled.div`
 
 export const OrderContainer = styled.div`
   width: 100%;
-  height: 8.5rem;
-  box-sizing: border-box;
-  border-radius: 6px;
-  background-color: #f3f2f2;
-  padding: 1rem;
+  height: fit-content;
   cursor: pointer;
+  padding: 1rem;
+  background-color: #f3f2f2;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: 1rem;
+  border-radius: 6px 44px;
 `;
 
 export const OrderHeader = styled.div`
