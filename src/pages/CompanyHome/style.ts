@@ -29,4 +29,5 @@ export const Card = styled.div`
   background-color: #4b2995;
   border-radius: 5px;
   box-shadow: 4px 4px 11px 0px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
 `;
