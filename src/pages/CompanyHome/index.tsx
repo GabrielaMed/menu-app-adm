@@ -70,7 +70,7 @@ export const CompanyHome = () => {
         toastMessageType={toastMessageType}
       />
       <Container>
-        <Header pageName='Home' />
+        <Header pageName='Gerenciamento' />
         {loading && (
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <ReactLoading

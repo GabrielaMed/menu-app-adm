@@ -47,7 +47,7 @@ export const ChosenTab = styled.button`
   justify-content: center;
   cursor: pointer;
 
-  &:first-child {
+  &:not(:last-child) {
     border-right: 1px solid white;
   }
 `;
