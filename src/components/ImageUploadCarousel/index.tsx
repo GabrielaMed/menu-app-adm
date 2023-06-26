@@ -11,6 +11,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 import { useContext, useEffect, useState } from 'react';
 import { GlobalContext } from '../../shared/GlobalContext';
+import { ProductImage } from './style';
 
 interface Props {
   productData: IProduct;
@@ -120,14 +121,19 @@ export const ImageUploadCarousel = ({ productData, setProductData }: Props) => {
         />
       </Form.Group>
 
-      <Carousel style={{ background: 'black', marginBottom: '1rem' }}>
+      <Carousel
+        style={{
+          background: 'black',
+          marginBottom: '1rem',
+          borderRadius: '6px',
+        }}
+      >
         {productData?.Image
           ? productData?.Image?.map((item, idx) => {
               return (
                 <Carousel.Item key={idx}>
-                  <img
+                  <ProductImage
                     className='d-block w-100'
-                    style={{ objectFit: 'cover', height: '15rem' }}
                     src={
                       process.env.REACT_APP_IMAGE_URL + item?.fileName ||
                       item.fileName
