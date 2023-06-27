@@ -11,6 +11,7 @@ import {
   Navbar,
   SearchBar,
   TextBox,
+  Footer,
 } from './style';
 import { IToastType } from '../../utils/Interface/Toast';
 import { api } from '../../services/api';
@@ -149,16 +150,18 @@ export const ProductList = () => {
                 <div>Nenhum produto encontrado.</div>
               )}
             </Cards>
+            <Footer>
+              <ButtonAddProduct
+                onClick={() => {
+                  setProductId('');
+                  navigate(`/product`);
+                }}
+              >
+                <MdAdd color='white' size={24} />
+              </ButtonAddProduct>
+            </Footer>
           </Content>
         )}
-        <ButtonAddProduct
-          onClick={() => {
-            setProductId('');
-            navigate(`/product`);
-          }}
-        >
-          <MdAdd color='white' size={24} />
-        </ButtonAddProduct>
       </Container>
     </>
   );

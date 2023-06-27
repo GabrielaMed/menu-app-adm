@@ -139,3 +139,15 @@ export const ButtonAddProduct = styled.button`
   justify-content: center;
   align-items: center;
 `;
+
+export const Footer = styled.footer`
+  height: 7rem;
+  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 1rem;
+`;
