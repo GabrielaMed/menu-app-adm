@@ -6,7 +6,11 @@ import { api } from '../../services/api';
 import { useContext, useEffect, useState } from 'react';
 import { ICompany } from '../../utils/Interface/Company';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MdOutlineFastfood, MdOutlineReceipt } from 'react-icons/md';
+import {
+  MdOutlineFastfood,
+  MdOutlineQrCode2,
+  MdOutlineReceipt,
+} from 'react-icons/md';
 import { GlobalContext } from '../../shared/GlobalContext';
 import ReactLoading from 'react-loading';
 import { ToastMessage } from '../../components/Toast';
@@ -95,6 +99,13 @@ export const CompanyHome = () => {
                 size={24}
                 color='white'
                 onClick={() => navigate(`/orders`)}
+              />
+            </Card>
+            <Card>
+              <MdOutlineQrCode2
+                size={24}
+                color='white'
+                onClick={() => navigate(`/tableQrCode`)}
               />
             </Card>
           </Content>

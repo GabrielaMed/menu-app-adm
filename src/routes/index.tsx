@@ -4,6 +4,7 @@ import { CompanyHome } from '../pages/CompanyHome';
 import { ProductList } from '../pages/ProductList';
 import { Orders } from '../pages/Orders';
 import { OrderDetails } from '../pages/OrderDetails';
+import { TableQrCode } from '../pages/TableQrCode';
 
 export const AppRoutes = () => (
   <Routes>
@@ -13,5 +14,6 @@ export const AppRoutes = () => (
     <Route path='/product' element={<NewProduct />} />
     <Route path='/orders' element={<Orders />} />
     <Route path='/orderDetails' element={<OrderDetails />} />
+    <Route path='/tableQrCode' element={<TableQrCode />} />
   </Routes>
 );
