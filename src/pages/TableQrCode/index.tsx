@@ -24,8 +24,6 @@ export const TableQrCode = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [show, setShow] = useState(false);
-  const linkUrl =
-    'https://menu-app-gm.netlify.app/cf9b4387-cb93-4895-a83f-7c92ee4e1125/2';
   const [tableQuantity, setTableQuantity] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [toastMessageType, setToastMessageType] = useState<IToastType>(
